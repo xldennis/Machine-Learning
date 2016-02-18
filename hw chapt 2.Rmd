@@ -1,0 +1,312 @@
+---
+title: "homework chapter 2"
+author: "Xiang Dennis Liu"
+date: "June 14th, 2015"
+output:
+  pdf_document:
+    fig_height: 4.3
+    fig_width: 8
+    keep_tex: yes
+  html_document:
+    fig_height: 4
+    fig_width: 8
+    toc: yes
+geometry: margin=1in
+setspace: onehalfspacing
+fontsize: 12pt
+---
+
+# Statistical Learning - Chapter 2
+
+### Exercises
+### Conceptual
+1. For each of parts (a) through (d), indicate whether we would generally expect the performance of a flexible statistical learning method to be better or worse than an inflexible method. Justify your answer.
+
+
+(a) Sample size n is extremely large, and number of perdictors p is small.
+- Since the number of predictors are small, we shouldn't worry about overfitting. And flexible method takes full advantages of large sample size. Therefore, `flexible model performs better`. 
+
+(b) Number of predictors p is extremely large, and number of observations n is small.
+- We are expected to fit a high-dimensional model. Insufficient sample size couldn't allow us to train a flexible method. Therefore, it's better to expect an `inflexible model would perform better`.
+
+(c) The relationship between the predictors and response is highly non-linear.
+- Since the model is nonlinear, `a flexible method performs better`. 
+
+(d) The variance of the error terms, i.e. $\sigma^2=Var(\epsilon)$, is extremely high.
+- Because the flexible could fit everything including the errors and the variance of errors is extremely high in this case, we expect an `inflexible model is better` to explore the trend and pattern of the data. 
+
+\hfill
+
+2. Explain whether each scenario is a classification or regression problem, and indicate whether we are most interested in inference or prediction. Finaly, provide n and p.
+
+
+(a) We collect a set of data on the top 500 firms in the US. For each firm we record profit, number of employees, industry and the CEO salary. We are interested in understanding which factors affect CEO salary.
+- `a supervised regression learning problem and we are interested in the inference (n = 500, p = 3)`
+
+(b) We are considering launching a new product and wish to know whether it will be a success or a failure. We collect data on 20 similar products that were previously launched. For each product we have recorded whether it was a success or failure, price charged for the product, marketing budget, competition price, and ten other variables.
+- `a supervised classification learning problem and we are interested in the prediction (n = 20, p = 13)`
+
+(c) We are interesting in predicting the % change in the US dollar in
+relation to the weekly changes in the world stock markets. Hence we collect weekly data for all of 2012. For each week we record the % change in the dollar, the % change in the US market, the % change in the British market, and the % change in the German market.
+- `a supervised regression learning problem and we want to make inferences on % change of US dollar based on weekly changes of world stock markets (n = 52, p = 3)
+
+\hfill
+
+3.  We now revisit the bias-variance decomposition.
+
+
+(a) Provide a sketch of typical (squared) bias, variance, training error, test error, and Bayes (or irreducible) error curves, on a single plot, as we go from less flexible statistical learning methods towards more flexible approaches. The x-axis should represent the amount of flexibility in the method, and the y-axis should represent the values for each curve. There should be five curves. Make sure to label each one.
+
+<img style="width: 250px; margin-left: 40px;" src="http://snag.gy/NSuKG.jpg">
+
+(b) Explain why each of the five curves has the shape displayed in part (a)
+
+- Squared bias: As flexibility increases the inherent inaccuracy of the model decreases.
+- Variance: Variance is a measure of how much the fit would change if the training sample was changed. A more flexible model will fit to the noise in the original sample and produce larger variance when using new training data. 
+- Training error: A more flexible model will fit the training data more closely, hence producing less training errors
+- Test error: It's a U-shape, starting high and dropping to an optimal minumum, then rising again as the more flexible models start to overfit the training data. 
+- Bayes(irreducible) error: Doesn't change with flexibility. 
+
+\hfill
+
+4. You will now think of some real-life applications for statistical learning
+
+
+(a) Describe three real-life applications in which classification might be useful. Describe the response, as well as the predictors. Is the goal of each application inference or prediction? Explain your answer.
+
+i. Suppose there are only four types of wheather: rainy, cloudy, sunny and windy. And we have categorized night humidity into 3 classes: dry, moderate, humid. We are interested in predicting wheather based on last night's humidity. The response is the four types of the wheather. The predictors are 3 classes of humidity. We are interested in the inference here.
+
+ii. We want to investigate whether student collaborate to work on the homework would affect whether they pass this class or not. The response is either pass or failure. The predictors are either do it alone or together. We are interested in the inference here.
+
+iii. To identify if a new product will be popular by studying qualities, prices, advertisements of 10 similar products. The response is either popular or not popular. The predictors are the three characteristics of those 10 products: qualities, prices and advertisements. We are interested in the prediction here.
+
+
+(b) Describe three real-life applications in which regression might be useful. Describe the response, as well as the predictors. Is the goal of each application inference or prediction? Explain your answer.
+
+i. Studying how much rainfall there will be by looking at tonight's humidity. We categorize night humidity into 3 classes: dry, moderate, humid. The response is how much there is of tomorrow rainfall. The predictors are 3 classes of humidity. We are interested in the inference here.
+
+ii. We want to predict tomorrow temperature based on current daily weather factors: humidity and dense of cloud. A regression model is built by regressing temperatures on their daily weather factors of the last 30 days. The response is tomorrow temperature, and the predictors are tomorrow weather factors (humidity and dese of cloud). The goal of this application is prediction.
+
+iii. The graduate GPA is related to a set of factors: undergraduate GPA, GRE score, the hours willing to spend studying in college and the attendance rate in undergraduate school. To predict the GPA of a potential candidate for the graduate school based on undergraduate GPA, GRE and rank of undergraduate school. A regression model is built to regress the graduate GPA on those 3 factors. Data is collected from 100 graduate students in the school. The response is the graduate GPA of a potential graduate applicant. The predictors are his/her undergraduate GPA, GRE and school rank. The goal of this application is prediction. 
+
+
+(c) Describe three real-life applications in which cluster analysis might be useful.
+
+i. The company want to target its customers by seperating them apart and by looking at their income and monthly spend. 
+
+ii. The teacher wants to predict students' pass or failure on the final by looking at their mid-term, homework grades and attendence performance. In this way, certain group of students are clustered. 
+
+iii. Clustering the community residents into three social classes based on their education, income and housing expenses. 
+
+\hfill
+
+7. The table below provides a training data set containing six observations, three predictors, and one qualitative response variable.
+
+<img style="width: 250px; margin-left: 40px;" src="http://snag.gy/4fXbE.jpg">
+
+- Suppose we wish to use this data set to make a prediction for Y when $X_1 = X_2 = X_3 = 0$ using K-nearest neighbors.
+
+(a) Compute the Euclidean distance between each observation and the test point, $X_1 = X_2 = X_3 = 0$
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(knitr)
+library(pander)
+panderOptions('round', 2)
+kable(data.frame(Obs.=c(1,2,3,4,5,6), X1=c(0,2,0,0,-1,1),
+                 X2=c(3,0,1,1,0,0), X3=c(0,0,3,2,1,2),
+                 Distance=c(3,2,sqrt(10), sqrt(5),sqrt(2),sqrt(3)),
+                 Y=c("Red","Red","Red","Green","Green","Red")), 
+      align = 'l')
+```
+
+(b) What is our prediction with K = 1? Why?
+- Green, because observation 5 is the closest point to $X_1 = X_2 = X_3 = 0$.
+
+(c) What is our prediction with K = 3? Why?
+- Red, because observation 2,5 and 6 are the 3 closest points to $X_1 = X_2 = X_3 = 0$. And red is more dominant here with both obs. 2 and 6 are red. 
+
+(d) If the Bayes decision boundary in this problem is highly non-linear, then would we expect the best value for K to be large or small? Why?
+- Since the bayes decision boundary is highly non-linear, we want to adopt a more flexible model. A smaller k would give a more flexible model to fit a non-inear decision boundary, whereas a larger k would produce a linear fit.
+
+
+### Applied
+8. This exercise relates to the College data set, which can be found in the file College.csv. It contains a number of variables for 777 different universities and colleges in the US. The variables are
+
+
+(a) Use the read.csv() function to read the data into R. Call the loaded data college. Make sure that you have the directory set to the correct location for the data.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(ISLR)
+library(knitr)
+college = read.csv("data/College.csv", header = T)
+```
+
+(b) Look at the data using the fix() function. You should notice that the first column is just the name of each university. We do not really want R to treat this as data. However, it may be handy to have these names for later. Try the following commands:
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+rownames(college)=college[,1]
+# fix(college)
+college=college[,-1]
+# fix(college) and View(college) work the same
+```
+
+(c) 
+
+
+i. Use the `summary()` function to produce a numerical summary of the variables in the data set.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+pander(t(summary(College)))
+```
+
+ii. Use the `pairs()` function to produce a scatterplot matrix of the first ten columns or variables of the data. Recall that you can reference the first ten columns of a matrix A using A[,1:10].
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+pairs(college[,1:10],panel = panel.smooth)
+```
+
+iii. Use the `plot()` function to produce side-by-side boxplots of `Outstate` versus `Private`.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+attach(college)
+plot(Outstate~Private,col = c("red", "green"), main = 'Outstate vs. Private')
+```
+
+iv. Create a new qualitative variable, called `Elite`, by binning the `Top10perc` variable. We are going to divide universities into two groups based on whether or not the proportion of students coming from the top 10% of their high school classes exceeds 50 %.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Elite = numeric(nrow(college)) # Elite=rep("No",nrow(college))
+Elite[college$Top10perc >50]="Yes"
+Elite[college$Top10perc <= 50]="No"
+Elite=as.factor(Elite)
+college=data.frame(college ,Elite)
+```
+
+- Use the `summary()` function to see how many elite universities there are. Now use the `plot()` function to produce side-by-side boxplots of `Outstate` versus `Elite`.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+summary(college$Elite)
+plot(Outstate~Elite,col = c("red", "green"), main = 'Outstate vs. Elite')
+```
+
+v. Use the `hist()` function to produce some histograms with differing numbers of bins for a few of the quantitative variables. You may find the command `par(mfrow=c(2,2))`
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+par(mfrow = c(2,2))
+hist(Apps, main="Number of applications received", col="red")
+hist(Personal, main="Estimated personal spending", col="green")
+hist(S.F.Ratio, main="Student/ Faculty ratio", col="blue")
+hist(Top25perc, main="New students from top 25 % of high school class", col="yellow")
+```
+
+vi. Continue exploring the data, and provide a brief summary of what you discover.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+par(mfrow = c(1,2))
+plot(Private, Apps, names = c("Public", "Private"), 
+     col = c("red", "green"), ylab = "# of applications received")
+plot(Private, Personal, names = c("Public", "Private"), 
+     col = c("magenta", "green"), ylab = "Personal spending")
+plot(Private, S.F.Ratio, names = c("Public", "Private"), 
+     col = c("maroon", "green"), ylab = "Student/ Faculty ratio")
+plot(Private, Top25perc, names = c("Public", "Private"), 
+     col = c("pink", "green"), ylab = "# of students from top 25% ")
+```
+
+- Public school receives more applicants, shows higher personal spendings which requires further exploration, has higher student/faculty ratio and slightly less number of students from 25% high school classes. 
+
+\hfill
+
+10. This exercise involves the Boston housing data set.
+
+(a) To begin, load in the `Boston` data set. The `Boston` data set is
+part of the `MASS` library in R. Now the data set is contained in the object Boston. Read about the data set: How many rows are in this data set? How many columns? What do the rows and columns represent?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(MASS)
+data(Boston)
+dim(Boston)
+```
+
+- The data has 506 rows and 14 columns. The rows represent the observations, while the columns are some data for this city.
+
+(b) Make some pairwise scatterplots of the predictors (columns) in this data set. Describe your findings.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+attach(Boston)
+pairs(~crim + nox + tax + lstat, data = Boston, panel = panel.smooth)
+```
+
+- From the pair-wise scatter plots shown above, crmime rate by town rises with an increase in the lower status of the populaion. And there seems to be a weak positive association between concentration of nitrogen oxide and increase in lower status of the populaion
+
+(c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.
+
+- Yes, as stated in part (b), the lower status of the populaion `lstat` increases with a corresponding rise in per capita crime rate `crim`.
+
+
+(d) Do any of the suburbs of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each predictor.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+boxplot(crim, col = "green", main = "Boxplot of Crime Rate")
+range(crim)[2] - range(crim)[1]
+summary(crim)
+```
+
+- Crime rate: range is 88.98, and there is suburbs of Boston that have particularly high crime rate (`outliers are spotted by open circles`)
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+boxplot(tax, col = "yellow", main = "Boxplot of Tax Rate")
+range(tax)[2] - range(tax)[1]
+summary(tax)
+```
+
+- Tax rates: range is 524, and there isn't seem to have any suburbs of Boston that have particularly high tax.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+boxplot(ptratio, col = "green", main = "Boxplot of Pupil-teacher Ratio")
+range(ptratio)[2] - range(ptratio)[1]
+summary(ptratio)
+```
+
+- Pupil-teacher ratio: the range is 9.4 and there is suburbs that have extremely low ratio but there isn't places of particularly high pupil-teacher ratio.(`outliers are spotted by open circles`)
+
+(e) How many of the suburbs in this data set bound the Charles river?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+table(chas)
+```
+
+- We have 35 suburbs of Boston that bound the Charles river.
+
+(f) What is the median pupil-teacher ratio among the towns in this data set?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+median(ptratio)
+```
+
+- The median pupil-teacher ratio among the towns in this data set is 19.05.
+
+(g) Which suburb of Boston has lowest median value of owner-occupied homes? What are the values of the other predictors for that suburb, and how do those values compare to the overall ranges for those predictors? Comment on your findings.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+# Min = apply(Boston, 2, FUN = min)
+# Max = apply(Boston, 2, FUN = max)
+Summary = apply(Boston, 2, FUN = quantile)
+pander(cbind(t(Boston[which(medv == min(medv)),]), t(Summary)))
+```
+
+- The suburb of Boston that have lowest median value of owner-occupied homes are 399 and 406. The other predictors of these two suburb are shown above. The proportion of residential land (`zn`), Charles River bounds(`chas`), average number of rooms (`rm`), weighted mean of distances (`dis`), median value of owner-occupied homes (`medv`) are below 1st quartile. 
+
+- And proportion of owner-occupied units before 1940 (`age`),  
+crime rate (`crim`), proportion of non-retail business (`indus`),  nitrogen oxides concentration (`nox`), accessibility to radial highways (`rad`), property-tax rate (`tax`), pupil-teacher ratio (`ptratio`), lower status of the population ('lstat') are above 3rd quartile.
+
+(h) In this data set, how many of the suburbs average more than seven rooms per dwelling? More than eight rooms per dwelling? Comment on the suburbs that average more than eight rooms per dwelling.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+rm7 = Boston[which(rm > 7),] # more than 7 rooms per dwelling
+nrow(rm7) # 64 rooms more than 7
+rm8 = Boston[which(rm > 8),] # more than 8 rooms per dwelling
+nrow(rm8) # 13 rooms more than 8
+pander(t(summary(rm8)))
+```
+
+- From the summary statistics shown above for suburbs with more than eight rooms per dwelling, we see that the crime rate `crim` is low at such locations, the percentage of lower status of the population `lstat` is also low and the proportion of blacks `black` is high. 

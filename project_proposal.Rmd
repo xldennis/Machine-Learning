@@ -1,0 +1,170 @@
+---
+title: "Proposal first draft"
+author: "Dennis Liu"
+date: "July 25th, 2015"
+output:
+  pdf_document:
+    fig_height: 4.3
+    fig_width: 8
+    keep_tex: yes
+  html_document:
+    fig_height: 4
+    fig_width: 8
+geometry: margin=1in
+setspace: onehalfspacing
+fontsize: 12pt
+---
+
+\hfill
+
+\hfill 
+
+I choose to analyze the starcraft master performance data from [UCI machine learning repository](http://archive.ics.uci.edu/ml/datasets/SkillCraft1+Master+Table+Dataset). 
+
+My goal is to classify players on their league rank based on bunch of predictors. I will try to apply all the methods we have learnt through this couse to this particular data. The report may be a good resource to me and students in the class to straight things out and prepare for the final.
+
+##### Attribute information is below
+
+- GameID: Unique ID number for each game (integer) 
+
+- LeagueIndex: Bronze, Silver, Gold, Platinum, Diamond, Master, GrandMaster, and Professional leagues coded 1-8 (Ordinal) 
+
+- Age: Age of each player (integer) 
+
+- HoursPerWeek: Reported hours spent playing per week (integer) 
+
+- TotalHours: Reported total hours spent playing (integer) 
+
+- APM: Action per minute (continuous) 
+
+- SelectByHotkeys: Number of unit or building selections made using hotkeys per timestamp (continuous) 
+
+- AssignToHotkeys: Number of units or buildings assigned to hotkeys per timestamp (continuous) 
+
+- UniqueHotkeys: Number of unique hotkeys used per timestamp (continuous)
+
+- MinimapAttacks: Number of attack actions on minimap per timestamp (continuous) 
+
+- MinimapRightClicks: number of right-clicks on minimap per timestamp (continuous) 
+
+- NumberOfPACs: Number of PACs(shift of screen) per timestamp (continuous)
+
+- GapBetweenPACs: Mean duration in milliseconds between PACs (continuous)
+
+- ActionLatency: Mean latency from the onset of a PACs to their first action in milliseconds (continuous) 
+
+- ActionsInPAC: Mean number of actions within each PAC (continuous) 
+
+- TotalMapExplored: The number of 24x24 game coordinate grids viewed by the player per timestamp (continuous) 
+
+- WorkersMade: Number of SCVs, drones, and probes trained per timestamp (continuous) 
+
+- UniqueUnitsMade: Unique unites made per timestamp (continuous) 
+
+- ComplexUnitsMade: Number of ghosts, infestors, and high templars trained per timestamp (continuous) 
+
+- ComplexAbilitiesUsed: Abilities requiring specific targeting instructions used per timestamp (continuous)
+
+#####Data sketch
+
+- There is 3395 player's information and 20 features
+
+- There is `167` players in Bronze, 347 in Silver, 553 in Gold, 811 in Platinum, 806 in Diamond, 621 in Master, 35 in GrandMaster, 35 in Professional. 
+
+- For simplicity and easy interpretation, I may convert multiclass problem to binary problem by recoding `master and beyond`(should I include Diamond as well) to be one group and other data to be the other group.
+
+- Some variables have small range and I scaled them
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+starcraft = read.table(file="starcraft.txt",head=TRUE,sep=",")
+starcraft = data.matrix(starcraft)
+star.std = starcraft[,-2] #exclude league information
+apply(starcraft,2,range) #those with small value are scaled
+star.std[,c(7,8,10,11,12,17,19,20)] = 
+  scale(starcraft[,c(7,8,10,11,12,17,19,20)], scale = T)
+cat ("there is ", length(which(apply(starcraft,2,is.na)==1)), 
+     " missing value") #no missing value
+```
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE,fig.height=10, fig.width= 10}
+library(corrplot)
+set.seed(1)
+size = nrow(star.std)
+train = sample(1:size, size/2) # if equally devide data set
+star.std = transform(star.std, rank = 
+                       ifelse(LeagueIndex > 4,  "high", "low"))
+star.train = star.std[train,]; star.test = star.std[-train,]
+# calculate correlation on numeric predictor variables
+pred.corr = round(cor(star.std[sapply(star.std, is.numeric)]), 2)
+# plot correlation matrix and order the variables using hierarchical cluster analysis
+par(ps=5)
+corrplot.mixed(pred.corr, order = "hclust", tl.col="black", 
+               diag = "n", tl.pos = "lt", lower = "circle", 
+               upper = "number", tl.cex = 1.5, mar=c(1,0,1,0))
+
+```
+
+
+##### Feature selection
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE,fig.height=4, fig.width= 10}
+# assumption of PCA is that features have maximum variance 
+# for maximum uniqueness, so that each feature is as distant 
+# as possible (as orthogonal as possible) from the other features.
+library(caret)
+library(leaps)
+nearZeroVar(star.train, saveMetrics=TRUE)
+fit = regsubsets(rank ~ ., data = star.std[train,-2], 
+                 nvmax = 20, method = "forward")
+fit.summary = summary(fit)
+
+par(mfrow = c(1, 3))
+plot(fit.summary$cp, xlab = "Number of variables", 
+     ylab = "Cp", type = "l")
+min.cp = min(fit.summary$cp); std.cp = sd(fit.summary$cp)
+abline(h = min.cp + 1 * std.cp, col = "red", lty = 2)
+abline(h = min.cp - 1 * std.cp, col = "red", lty = 2)
+
+plot(fit.summary$bic, xlab = "Number of variables",
+     ylab = "BIC", type='l')
+min.bic = min(fit.summary$bic); std.bic = sd(fit.summary$bic)
+abline(h = min.bic + 1 * std.bic, col = "red", lty = 2)
+abline(h = min.bic - 1 * std.bic, col = "red", lty = 2)
+
+plot(fit.summary$adjr2, xlab = "Number of variables", 
+     ylab = "Adjusted Rsquare", type = "l", ylim = c(0.4, 0.84))
+max.adjr2 = max(fit.summary$adjr2); std.adjr2 <- sd(fit.summary$adjr2)
+abline(h = max.adjr2 + 1 * std.adjr2, col = "red", lty = 2)
+abline(h = max.adjr2 - 1 * std.adjr2, col = "red", lty = 2)
+
+cat("optimal model selected by CP algorithm is: ") 
+coef(fit, id = which.min(fit.summary$cp))
+
+cat("optimal model selected by BIC algorithm is: ") 
+coef(fit, id = which.min(fit.summary$bic))
+
+cat("optimal model selected by adjusted R square is: ") 
+coef(fit, id = which.max(fit.summary$adjr2))
+# # t-Distributed Stochastic Neighbor Embedding
+# library(Rtsne)
+# data = star.train[,-2] #take league-ranking out
+# tsne = Rtsne(as.matrix(star.train), check_duplicates=FALSE, pca=TRUE, 
+#               perplexity=30, theta=0.5, dims=2)
+# embedding = as.data.frame(tsne$Y)
+# embedding$Class = star.std$rank[train]
+# g = ggplot(embedding, aes(x=V1, y=V2, color=Class)) +
+#   geom_point(size=1.25) +
+#   guides(colour=guide_legend(override.aes=list(size=6))) +
+#   xlab("") + ylab("") +
+#   ggtitle("classification problem - Tsne algorithm") +
+#   theme_light(base_size=20) +
+#   theme(axis.text.x=element_blank(),
+#         axis.text.y=element_blank())
+# print(g)
+```
+
+- All features have equal variance and uniqueness. 
+
+- I decided based on BIC to choose  APM   UniqueHotkeys  MinimapAttacks    NumberOfPACs  GapBetweenPACs   ActionLatency     WorkersMade UniqueUnitsMade (8 features in total) to predict their rank. 
+
+

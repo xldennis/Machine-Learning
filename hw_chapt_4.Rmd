@@ -1,0 +1,384 @@
+---
+title: "homework chapter 4"
+author: "Dennis Liu"
+date: "June 27th, 2015"
+output:
+  pdf_document:
+    fig_height: 4.3
+    fig_width: 8
+    keep_tex: yes
+  html_document:
+    fig_height: 4
+    fig_width: 8
+geometry: margin=1in
+setspace: onehalfspacing
+fontsize: 12pt
+---
+
+
+
+# Statistical Learning - Chapter 4
+
+## Exercises
+### Conceptual
+1. Using a little bit of algebra, prove that (4.2) is equivalent to (4.3). In other words, the logistic function representation and logit represen- tation for the logistic regression model are equivalent.
+
+
+$$p(X) = \frac {e^{\beta_0 + \beta_1 X}} {1 + e^{\beta_0 + \beta_1 X}} \ \ (4.2) $$ 
+
+So, $$\frac {p(X)} {1 - p(X)} = \frac {\frac {e^{\beta_0 + \beta_1 X}} {1 + e^{\beta_0 + \beta_1 X}}} {1 - \frac {e^{\beta_0 + \beta_1 X}} {1 + e^{\beta_0 + \beta_1 X}}} \ = \frac {\frac {e^{\beta_0 + \beta_1 X}} {1 + e^{\beta_0 + \beta_1 X}}} { \frac {1 + e^{\beta_0 + \beta_1 X}} {1 + e^{\beta_0 + \beta_1 X}} - \frac {e^{\beta_0 + \beta_1 X}} {1 + e^{\beta_0 + \beta_1 X}} } \ = \frac {\frac {e^{\beta_0 + \beta_1 X}} {1 + e^{\beta_0 + \beta_1 X}}} {\frac {1} {1 + e^{\beta_0 + \beta_1 X}}} = e^{\beta_0 + \beta_1 X} \ \ (4.3)$$ 
+
+\hfill
+
+2. It was stated in the text that classifying an observation to the class for which (4.12) is largest is equivalent to classifying an observation to the class for which (4.13) is largest. Prove that this is the case. In other words, under the assumption that the observations in the kth class are drawn from a $N(\mu_k,\sigma^2)$ distribution, the Bayes’ classifier assigns an observation to the class for which the discriminant function is maximized.
+
+
+Assuming that $f_k(x)$ is normal or Gaussian, the probability that an observation $x$ is in class $k$ is:
+$$ p_k(x) = \frac {\pi_k \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_k)^2) } {\sum { \pi_l \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_l)^2) }} \ \ (4.12)$$
+And the discriminant function is the following: $$ \delta_k(x) = x \frac {\mu_k} {\sigma^2} - \frac {\mu_k^2} {2 \sigma^2} + \log(\pi_k) \ \ (4.13)$$
+Want to show: Larger $\delta_k(x)$ also means larger$p_k(x)$ (PS: the other direction of proof is similar except taking the log)
+
+_Proof_: Let $x$ be fixed and suppose $\delta_k(x) \geq \delta_l(x)$. we want to show that $f_k(x) \geq f_l(x)$ as well.
+
+From 4.13, because $\delta_k(x) \geq \delta_l(x)$, we have the following:
+$$ x \frac {\mu_k} {\sigma^2} - \frac {\mu_k^2} {2 \sigma^2} + \log(\pi_k) \geq x \frac {\mu_l} {\sigma^2} - \frac {\mu_l^2} {2 \sigma^2} + \log(\pi_l) \ \ (1)$$
+Since the `exp()` function is monotonically increasing, take the `exp()` of `(1)`, we have the following:
+$$\pi_k \exp (x \frac {\mu_k} {\sigma^2} - \frac {\mu_k^2} {2 \sigma^2}) \geq \pi_l \exp (x \frac {\mu_l} {\sigma^2} - \frac {\mu_l^2} {2 \sigma^2}) \ \ (2)$$
+
+Multipy `(2)` by a constant number equaling $\frac { \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} x^2) } {\sum { \pi_i \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_i)^2) }}$ on both side, we have 
+
+$$\frac {\pi_k \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_k)^2) } {\sum { \pi_i \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_i)^2) }} \geq \frac {\pi_l \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_l)^2) } {\sum { \pi_i \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_i)^2) }} \ \ (3)$$
+which is $f_k(x) \geq f_l(x)$ by 4.12. 
+
+To prove Larger $p_k(x)$ leads to larger $\delta_k(x)$ is similar. 
+
+\hfill
+
+3. This problem relates to the QDA model, in which the observations within each class are drawn from a normal distribution with a class- specific mean vector and a class specific covariance matrix. We con- sider the simple case where p = 1; i.e. there is only one feature.
+
+Suppose that we have K classes, and that if an observation belongs to the kth class then X comes from a one-dimensional normal dis- tribution, $X ~ N(\mu_k, \sigma_k^2)$. Recall that the density function for the one-dimensional normal distribution is given in (4.11). Prove that in this case, the Bayes’ classifier is not linear. Argue that it is in fact quadratic.
+
+
+__Claim__: After plugging 4.11 in 4.12 and take the logrithm of it, it's not a linear tearm of x
+
+_Proof_: $$log(p_k(x)) = \log(\pi_k) + \log(\frac {1} {\sqrt{2 \pi} \sigma_k}) - \frac {1} {2 \sigma_k^2} (x - \mu_k)^2 - \log(\sum { \pi_l \frac {1} {\sqrt{2 \pi} \sigma_l} \exp(- \frac {1} {2 \sigma_l^2} (x - \mu_l)^2) })$$
+Since the last term is sum of all expectations, we temporarily leave it out and now we consider the following function: 
+$$- \frac {x^2} {2 \sigma_k^2}  + \frac {\mu_k x} {\sigma_k^2} - \frac {\mu_k^2} {2 \sigma_k^2} + \log(\pi_k) + \log(\frac {1} {\sqrt{2 \pi} \sigma_k})$$ 
+Which is a quadratic function of x. 
+
+\hfill
+
+5. We now examine the differences between LDA and QDA
+
+(a) If the Bayes decision boundary is linear, do we expect LDA or QDA to perform better on the training set? On the test set?
+- QDA is more flexible and fit the training data better. But on the test set, since QDA could overfit the linearity of the Bayes decision boundary, we expect the LDA to perform better. 
+
+(b) If the Bayes decision boundary is non-linear, do we expect LDA or QDA to perform better on the training set? On the test set?
+- If the Bayes decision bounary is non-linear, then QDA is supposed to perform better both on the training and test sets.
+
+(c) In general, as the sample size n increases, do we expect the test prediction accuracy of QDA relative to LDA to improve, decline, or be unchanged? Why?
+- As increase of sample size n, the test accuracy of QDA should improve as large sample could offset large variance of higher flexible model.  
+
+(d) True or False: Even if the Bayes decision boundary for a given problem is linear, we will probably achieve a superior test error rate using QDA rather than LDA because QDA is flexible enough to model a linear decision boundary. Justify your answer
+- False. If we have small sample, the larger variance yielded by the more flexible method (QDA) would lead to overfit and higher test error rate. 
+
+\hfill
+
+6. Suppose we collect data for a group of students in a statistics class with variables X1 = hours studied, X2 = undergrad GPA, and Y = receive an A. We fit a logistic regression and produce estimated coefficient, $\beta_0 = -6, \beta_1 = 0.05, \beta_2 = 1$.
+
+(a) Estimate the probability that a student who studies for 40 h and has an undergrad GPA of 3.5 gets an A in the class.
+- $$\hat Y = \frac{e^{-6+0.05*40+3.5}}{1+e^{-6+0.05*40+3.5}} = 0.38$$
+- It has 38% to get an A in the class.
+
+(b) How many hours would the student in part (a) need to study to have a 50 % chance of getting an A in the class?
+- $$e^{-6+0.05 \hat {hour} +3.5} = \frac{0.5}{1-0.5} $$
+- We have $\hat {hour} = 50$
+- You need to study for 50 hours to get 50% chance of getting an A. 
+
+\hfill
+
+7. Suppose that we wish to predict whether given stock will issue a dividend this year (“Yes” or “No”) based on X, last year’s percent profit. We examine a large number of companies and discover that the mean value of X for companies that issued a dividend was $\bar X = 10$, while the mean for those that didn’t was $\bar X = 0$. In addition, the variance of X for these two sets of companies was $\hat \sigma^2 = 36$. Finally, 80 % of companies issued dividends. Assuming that X follows a normal distribution, predict the probability that a company will issue a dividend this year given that its percentage profit was X = 4 last year.
+
+
+$$p_k(x) = \frac {\pi_k \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_k)^2) } {\sum_{i=1}^K { \pi_i \frac {1} {\sqrt{2 \pi} \sigma} \exp(- \frac {1} {2 \sigma^2} (x - \mu_i)^2) }} \ \ (4.12)$$
+Since there are only two classes, either divide or not and $\bar X_{yes} = 10$, $\bar X_{not} = 10$, we have the following 
+$$\hat p_k(x) = \frac {\pi_{yes} \exp(- \frac {1} {2 \sigma^2} (x - \mu_{yes})^2)} { \pi_{yes} \exp(- \frac {1} {2 \sigma^2} (x - \mu_{yes})^2) + \pi_{no} \exp(- \frac {1} {2 \sigma^2} (x - \mu_{no})^2)} = 0.75$$
+As shown above, the probability that a company will issue a dividend this year given that its percentage return was X = 4 last year is 75%. 
+
+\hfill
+
+### Applied
+10. This question should be answered using the Weekly data set, which is part of the ISLR package. This data is similar in nature to the Smarket data from this chapters lab, except that it contains 1,089 weekly returns for 21 years, from the beginning of 1990 to the end of 2010.
+
+(a) Produce some numerical and graphical summaries of the Weekly data. Do there appear to be any patterns?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(ISLR)
+data(Weekly)
+summary(Weekly)
+pairs(Weekly, panel = panel.smooth)
+```
+
+- The only substantial correlation I noticed in the pair plot is volume-year. It shows that the volume increases as time goes by. 
+
+
+(b) Use the full data set to perform a logistic regression with Direction as the response and the five lag variables plus Volume as predictors. Use the summary function to print the results. Do any of the predictors appear to be statistically significant? If so, which ones?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+attach(Weekly)
+library(pander)
+logFit = glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,
+              family=binomial)
+pander(summary(logFit)$coef)
+```
+
+- only *Lag2* appears to be statistically significant. 
+
+
+(c) Compute the confusion matrix and overall fraction of correct predictions. Explain what the confusion matrix is telling you about the types of mistakes made by logistic regression.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+pred.prob = predict(logFit, type="response") #predicted probability
+pred.res = rep("Down", length(pred.prob)) #predicted result based on bayesian probability
+pred.res[pred.prob>0.5] = "Up"
+table(pred.res, Direction)
+```
+
+- Percentage of currect predictions is $\frac{54+557}{54+557+48+430}$ = 56.1%, which means 1 - 56.1% = 43.9% is the training error rate
+- When the weekly percentage return does go up, the logistic regression predicts quite well, with the accuracy of $\frac{557}{557+48}$ = 92.1%. But it is wrong most of the time ($\frac{54}{430+54}$ = 11.2%) when the return actually goes down.
+
+
+(d) Now fit the logistic regression model using a training data period from 1990 to 2008, with Lag2 as the only predictor. Compute the confusion matrix and the overall fraction of correct predictions for the held out data (that is, the data from 2009 and 2010).
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+trainData = (Year<2009)
+logFit2 = glm(Direction~Lag2, family=binomial, data = Weekly, 
+              subset=trainData)
+# or using data = Weekly[Year<2009,], works as well.
+pred.prob = predict(logFit2, type="response",newdata=Weekly[!trainData,])
+#predicted probability #predicted probability
+pred.res = rep("Down", length(pred.prob)) #predicted result based on bayesian probability
+pred.res[pred.prob>0.5] = "Up"
+table(pred.res, Direction[!trainData],dnn = c("train","test"))
+```
+
+- Percentage of currect predictions is $\frac{9+56}{9+5+34+56}$ = 62.5%, which means 1 - 62.5% = 37.5% is the testing error rate 
+- When the weekly percentage return actually does go up, the logistic regression model predicts quite well, with the accuracy of $\frac{56}{56+5}$ = 91.8%. But it is wrong most of the time ($\frac{9}{9+34}$ = 20.9%) when the return actually goes down in the testing data.
+
+
+(e) Repeat (d) using LDA.
+
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(MASS)
+trainData = (Year<2009)
+ldaFit = lda(Direction ~ Lag2, data=Weekly, subset=trainData)
+lda.res = predict(ldaFit, newdata=Weekly[!trainData,])
+table(lda.res$class, Direction[!trainData],dnn = c("train","test"))
+# it's the same if we use sum(lda.res$posterior[,2]<.5) to do classification
+# mean(Direction[trainData] == "Up"): prior prob
+# mean(Lag2[Direction[trainData] == "Up"]): group mean, but not exactly
+# nUp = length(Lag2[Direction[trainData] == "Up"])
+# nDown = length(Lag2[Direction[trainData] != "Up"])
+# (var(Lag2[Direction[trainData] == "Up"])*nUp + 
+# var(Lag2[Direction[trainData] != "Up"])*nDown)/(nUp+nDown-2): 
+# the sigma square = 5.54
+```
+
+- Coincident, we get the same result as before. Percentage of currect predictions is $\frac{9+56}{9+5+34+56}$ = 62.5%, which means 1 - 62.5% = 37.5% is the testing error rate 
+- When the weekly percentage return actually does go up, the LDA model predicts quite well, with the accuracy of $\frac{56}{56+5}$ = 91.8%. But it is wrong most of the time ($\frac{9}{9+34}$ = 20.9%) when the return actually goes down in the testing data.
+
+
+(f) Repeat (d) using QDA.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+trainData = (Year<2009)
+qdaFit = qda(Direction ~ Lag2, data=Weekly, subset=trainData)
+qda.res = predict(qdaFit, newdata=Weekly[!trainData,])
+table(qda.res$class, Direction[!trainData],dnn = c("train","test"))
+```
+
+- In this case, percentage of currect predictions is $\frac{61}{43+61}$ = 58.7%, which means 1 - 58.7% = 41.3% is the testing error rate 
+- When the weekly percentage return actually does go up, the QDA model predicts perfectly, with the accuracy of 100%. But it is all wrong (0%) when the return actually goes down in the testing data.
+
+
+(g) Repeat (d) using KNN with K = 1.
+
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+trainData = (Year<2009)
+library(class)
+train.X = as.matrix(Lag2[trainData])
+test.X = as.matrix(Lag2[!trainData])
+train.Direction = Direction[trainData]
+set.seed (1)
+knn.pred=knn(train.X,test.X,train.Direction ,k=1)
+table(knn.pred, Direction[!trainData],dnn = c("train","test"))
+```
+
+- Percentage of currect predictions is $\frac{21+31}{21+30+22+31}$ = 50%, which means 1- 50% = 50% is the testing error rate 
+- When the weekly percentage return actually does go up, the KNN(k=1) model correctly predict $\frac{31}{31+30}$ = 50.8% of the test data. And it equally perform poor when the return actually goes down in the testing data (accuracy: $\frac{21}{21+22}$ = 48.8%).
+
+
+(h) Which of these methods appears to provide the best results on
+this data?
+
+- By comparing the test error rates, the logistic regression and LDA perform equally well with the minimum error rates, followed by QDA and KNN.
+
+(i) Experiment with different combinations of predictors, including possible transformations and interactions, for each of the methods. Report the variables, method, and associated confusion matrix that appears to provide the best results on the held out data. Note that you should also experiment with values for K in the KNN classifier.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+trainData = (Year<2009)
+testData = Weekly[!trainData,]
+# Logistic regression with Lag2, square root of abs(Today) 
+# and their interaction
+log.fit = glm(Direction ~ Lag2 * sqrt(abs(Today)), data=Weekly, 
+              family=binomial, subset=trainData)
+pred.probs = predict(log.fit, testData, type="response")
+pred.res = rep("Down", length(pred.probs))
+pred.res[pred.probs>.5] = "Up"
+table(pred.res, Direction[!trainData],dnn = c("train","test"))
+mean(pred.res == Direction[!trainData])
+
+
+# LDA with Lag2, square root of abs(Today) and their interaction
+lda.fit = lda(Direction ~ Lag2 * sqrt(abs(Today)), data=Weekly, 
+              subset=trainData)
+lda.pred = predict(lda.fit, testData)
+table(lda.res$class, Direction[!trainData],dnn = c("train","test"))
+mean(lda.pred$class == Direction[!trainData])
+
+
+# QDA with Lag2, square root of abs(Today) and their interaction
+qda.fit = qda(Direction ~ Lag2 * sqrt(abs(Today)), data=Weekly, 
+              subset=trainData)
+qda.pred = predict(qda.fit, testData)
+table(qda.res$class, Direction[!trainData],dnn = c("train","test"))
+mean(qda.pred$class == Direction[!trainData])
+
+# KNN k =10
+train.X = cbind(Lag2[trainData], Today[trainData], 
+                Lag2[trainData]*Today[trainData])
+test.X = cbind(Lag2[!trainData], Today[!trainData], 
+                Lag2[!trainData]*Today[!trainData])
+train.Direction = Direction[trainData]
+knn.pred = knn(train.X, test.X, train.Direction, k=10)
+table(knn.pred, Direction[!trainData])
+mean(knn.pred == Direction[!trainData])
+
+# KNN k = 100
+train.X = cbind(Lag2[trainData], Today[trainData], 
+                Lag2[trainData]*Today[trainData])
+test.X = cbind(Lag2[!trainData], Today[!trainData], 
+                Lag2[!trainData]*Today[!trainData])
+train.Direction = Direction[trainData]
+knn.pred = knn(train.X, test.X, train.Direction, k=100)
+table(knn.pred, Direction[!trainData])
+mean(knn.pred == Direction[!trainData])
+```
+
+- Of these permutations, the KNN performs well and QDA performs poorly. Larger K leads to lower test error.
+
+\hfill
+
+11. In this problem, you will develop a model to predict whether a given
+car gets high or low gas mileage based on the Auto data set.
+
+(a) Create a binary variable, mpg01, that contains a 1 if mpg contains a value above its median, and a 0 if mpg contains a value below its median. You can compute the median using the median() function. Note you may find it helpful to use the data.frame() function to create a single data set containing both mpg01 and the other Auto variables.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+data(Auto)
+attach(Auto)
+mpg01 = rep(0, length(mpg))
+mpg01[mpg>median(mpg)] = 1
+Auto = data.frame(Auto, mpg01)
+```
+
+
+(b) Explore the data graphically in order to investigate the association between mpg01 and the other features. Which of the other features seem most likely to be useful in predicting mpg01? Scatterplots and boxplots may be useful tools to answer this question. Describe your findings.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+pairs(Auto, panel = panel.smooth)
+par(mfrow = c(2,2))
+boxplot(displacement ~ mpg01, data = Auto, main = "displacement vs mpg01")
+boxplot(year ~ mpg01, data = Auto, main = "year vs mpg01")
+boxplot(weight ~ mpg01, data = Auto, main = "weight vs mpg01")
+boxplot(horsepower ~ mpg01, data = Auto, main = "horsepower vs mpg01")
+```
+
+- There might be some relationship between mpg and engine displacement, mpg and horsepower, mpg and vehicle weight, and mpg and model year.  
+
+(c) Split the data into a training set and a test set.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+train.index = sort(sample(1:nrow(Auto), nrow(Auto)/2, replace=FALSE))
+test.index = (1:nrow(Auto))[-train.index] 
+trainData = Auto[train.index,]; testData = Auto[test.index,]
+```
+
+
+(d) Perform LDA on the training data in order to predict mpg01 using the variables that seemed most associated with mpg01 in (b). What is the test error of the model obtained?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+lda.fit = lda(mpg01 ~ year + weight + displacement + horsepower, 
+             data = trainData)
+lda.pred = predict(lda.fit, testData)
+error = mean(lda.pred$class != testData$mpg01)
+cat("The test error rate of LDA is", error)
+```
+
+
+e) Perform QDA on the training data in order to predict mpg01 using the variables that seemed most associated with mpg01 in (b). What is the test error of the model obtained?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+qda.fit = qda(mpg01 ~ year + weight + displacement + horsepower, 
+             data = trainData)
+qda.pred = predict(qda.fit, testData)
+error = mean(qda.pred$class != testData$mpg01)
+cat("The test error rate of QDA is", error)
+```
+
+
+(f) Perform logistic regression on the training data in order to pre- dict mpg01 using the variables that seemed most associated with mpg01 in (b). What is the test error of the model obtained?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+log.fit = glm(mpg01 ~ year + weight + displacement + horsepower, 
+             data = trainData, family = binomial)
+log.prob = predict(log.fit, testData)
+log.pred = rep(0, length(log.prob))
+log.pred[log.prob>.5] = 1
+error = mean(log.pred != testData$mpg01)
+cat("The test error rate of logistic regression is", error)
+```
+
+
+(g) Perform KNN on the training data, with several values of K, in order to predict mpg01. Use only the variables that seemed most associated with mpg01 in (b). What test errors do you obtain? Which value of K seems to perform the best on this data set?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+train.X = as.matrix(trainData[,c("displacement",
+                                 "horsepower","weight","year")])
+test.X = as.matrix(testData[,c("displacement",
+                                 "horsepower","weight","year")])
+train.mpg01 = mpg01[train.index]
+set.seed(1)
+knn.pred = knn(train.X, test.X, train.mpg01, k=1)
+error = mean(knn.pred != mpg01[test.index])
+cat("The test error rate (K = 1) is", error)
+```
+
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+knn.pred = knn(train.X, test.X, train.mpg01, k=10)
+error = mean(knn.pred != mpg01[test.index])
+cat("The test error rate (K = 10) is", error)
+```
+
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+knn.pred = knn(train.X, test.X, train.mpg01, k=100)
+error = mean(knn.pred != mpg01[test.index])
+cat("The test error rate (K = 100) is", error)
+```
+
+- It seems to me that smaller K has less test error but we have overfit problem when K is too small (e.g., k = 1 in this case). Therefore, a moderately smaller K is desired to have the smallest test error.  
+

@@ -1,0 +1,331 @@
+---
+title: "homework chapter 7"
+author: "Dennis Liu"
+date: "July 14th, 2015"
+output:
+  pdf_document:
+    fig_height: 4.3
+    fig_width: 8
+    keep_tex: yes
+  html_document:
+    fig_height: 4
+    fig_width: 8
+geometry: margin=1in
+setspace: onehalfspacing
+fontsize: 12pt
+---
+
+Q1. It was mentioned in the chapter that a cubic regression spline with one knot at $\xi$ can be obtained using a basis of the form $x$; $x^2$, $x^3$, $(x - \xi)^3_+$, where $(x - \xi)^3_+ = (x - \xi)^3$ if $x > \xi$ and equals $0$ otherwise. We will now show that a function of the form $$f(x) = \beta_0 + \beta_1x + \beta_2x^2 + \beta_3x^3 + \beta_4(x - \xi)^3_+$$ is indeed a cubic regression spline, regardless of the values of $\beta_0,\beta_1,\beta_2,\beta_3,\beta_4$.
+
+
+(a) Find a cubic polynomial $$f_1(x) = a_1 + b_1x + c_1x^2 + d_1x^3$$ such that $f(x) = f_1(x)$ for all $x\le\xi$. Express $a_1,b_1,c_1,d_1$ in terms of $\beta_0,\beta_1,\beta_2,\beta_3,\beta_4$.
+
+Solution: For $x\le\xi$, because $(x - \xi)^3_+=0$, we have $f(x) = \beta_0 + \beta_1x + \beta_2x^2 + \beta_3x^3$ so we take $a_1 = \beta_0$, $b_1 = \beta_1$, $c_1 = \beta_2$ and $d_1 = \beta_3$.
+
+(b) Find a cubic polynomial $$f_2(x) = a_2 + b_2x + c_2x^2 + d_2x^3$$ such that $f(x) = f_2(x)$ for all $x>\xi$. Express $a_2,b_2,c_2,d_2$ in terms of $\beta_0,\beta_1,\beta_2,\beta_3,\beta_4$. We have now established that $f(x)$ is a piecewie polynomial.
+
+Solution: For $x>\xi$, we have the following $$f(x) = (\beta_0 - \beta_4\xi^3) + (\beta_1 + 3\xi^2\beta_4)x + (\beta_2 - 3\beta_4\xi)x^2 + (\beta_3 + \beta_4)x^3$$, so we take $a_2 = \beta_0 - \beta_4\xi^3$, $b_2 = \beta_1 + 3\xi^2\beta_4$, $c_2 = \beta_2 - 3\beta_4\xi$ and $d_2 = \beta_3 + \beta_4$.
+
+(c) Show that $f_1(\xi) = f_2(\xi)$. That is $f(x)$ is continuous at $\xi$.
+
+Solution: plug $\xi$ in $f_1(\xi)$ and $f_2(\xi)$, $$\begin{aligned} f_1(\xi) &= \beta_0 + \beta_1\xi + \beta_2\xi^2 + \beta_3\xi^3 \\ f_2(\xi) &= (\beta_0 - \beta_4\xi^3) + (\beta_1 + 3\xi^2\beta_4)\xi + (\beta_2 - 3\beta_4\xi)\xi^2 + (\beta_3 + \beta_4)\xi^3 \\ &= \beta_0 + \beta_1\xi + \beta_2\xi^2 + \beta_3\xi^3 \end{aligned}$$
+
+(d) Show that $f_1'(\xi) = f_2'(\xi)$. That is $f'(x)$ is continuous at $\xi$.
+
+Solution: $$\begin{aligned} f_1'(\xi) &= \beta_1 + 2\beta_2\xi + 3\beta_3\xi^2 \\ f_2'(\xi) &= \beta_1 + 3\xi^2\beta_4 + 2(\beta_2 - 3\beta_4\xi)\xi + 3(\beta_3 + \beta_4)\xi^2 \\ &= \beta_1 + 2\beta_2\xi + 3\beta_3\xi^2 \end{aligned}$$
+
+(e) Show that $f_1''(\xi) = f_2''(\xi)$. That is $f''(x)$ is continuous at $\xi$. Therefore, $f(x)$ is indeed a cubic spline.
+
+Solution: $$\begin{aligned} f_1''(\xi) &= 2\beta_2 + 6\beta_3\xi \\ f_2''(\xi) &= 2(\beta_2 - 3\beta_4\xi) + 6(\beta_3 + \beta_4)\xi = 2\beta_2 + 6\beta_3\xi \end{aligned}$$
+
+\hfill
+
+Q2. Suppose that a curve $\hat{g}$ is computed to smoothly fit a set of $n$ points using the following formula $$\hat{g} = \arg\min_g\Biggl(\sum_{i=1}^n(y_i - g(x_i))^2 + \lambda\int[g^{(m)}(x)]^2dx\biggr)$$, where $g^{(m)}$ represents the mth derivative of $g$ (and $g^{(0)} = g$). Provide example sketches of $\hat{g}$ in each of the following scenarios.
+
+
+(a) $\lambda = \infty$, $m = 0$.
+
+Solution: in this case, m = 0, we put penalty on function itself. Therefore a large smoothing parameter $\lambda \rightarrow \infty$ forces $g^{(0)}(x)\rightarrow 0$. 
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+x = seq(from = 0,to = 30, length.out = 50)
+y = 1 + x + -2 * (x-1)^2 + 3*(x+5)^3 + 2*(x)^4
+data = data.frame(x,y)
+plot(x,y,pch = 20, type = "b", col = "red")
+abline(h = 0,lwd=3)
+```
+
+(b) $\lambda = \infty$, $m = 1$.
+
+Solution: in this case, m = 1 and we put penalty on first derivative. Therefore a large smoothing parameter $\lambda \rightarrow \infty$ forces $g^{(1)}(x)\rightarrow 0$ and $g^{(0)}(x)\rightarrow c$ (where c is a constant number)
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+plot(x,y,pch = 20, type = "b", col = "red")
+abline(h = 371459.3, lwd = 3)
+```
+
+(c) $\lambda = \infty$, $m = 2$.
+
+Solution: in this case, m = 2 and we put penalty on the second derivative. Therefore a large smoothing parameter $\lambda \rightarrow \infty$ forces $g^{(2)}(x)\rightarrow 0$ and makes $\hat{g} \rightarrow ax + b$
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+plot(x,y,pch = 20, type = "b", col = "red")
+abline(a =-345819, b = 47819  , lwd = 3)
+```
+
+(d) $\lambda = \infty$, $m = 3$.
+
+Solution: in this case, m = 3 and we put penalty on the third derivative. Therefore a large smoothing parameter $\lambda \rightarrow \infty$ forces $g^{(3)}(x)\rightarrow 0$ and makes $\hat{g} \rightarrow ax^2 + bx + c$
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+plot(x,y,pch = 20, type = "b", col = "red")
+curve( 3279*x^2-50549*x+135982, add = TRUE, lwd=3)
+```
+
+(e) $\lambda = 0$, $m = 3$.
+
+Solution: in this case, m = 3 but we do not put any penalty on the third derivative function. Therefore we will just get what least square gives us.
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+plot(x,y,pch = 20, type = "b", col = "red")
+curve(1 + x + -2 * (x-1)^2 + 3*(x+5)^3 + 2*(x)^4, add = TRUE, lwd=3)
+```
+
+\hfill
+
+Q3. Suppose we fit a curve with basis functions $b_1(X) = X$, $b_2(X) = (X - 1)^2I(X\ge 1)$. We fit the linear regression model $$Y = \beta_0 + \beta_1b_1(X) + \beta_2b_2(X) + \varepsilon$$, and obtain coefficient estimates $\hat{\beta}_0 = 1$, $\hat{\beta}_1 = 1$, $\hat{\beta}_2 = -2$. Sketch the estimated curve between $X = -2$ and $X = 2$. Note the intercepts, slopes, and other relevant information.
+
+Solution: The curve is linear between $-2$ and $1$ : $y = 1 + x$ and quadratic between $1$, and $2$ : $y = 1 + x -2(x - 1)^2$.
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+x = seq(from = -2,to = 2, length.out = 30)
+y = 1 + x + -2 * (x-1)^2 * I(x>1)
+data = data.frame(x,y)
+plot(x,y,pch = 20, type = "b", col = "green")
+curve(1 + x, from = -2, to = 1, add = TRUE, col = "yellow", lwd=3)
+curve(1 + x + -2 * (x-1)^2, from = 1, to = 2, add = TRUE, 
+      col = "violet", lwd=3)
+```
+
+\hfill
+
+Q4. Suppose we fit a curve with basis functions $b_1(X) = I(0\le X\le 2) - (X - 1)I(1\le X\le 2)$, $b_2(X) = (X - 3)I(3\le X\le 4) + I(4\le X\le 5)$. We fit the linear regression model $$Y = \beta_0 + \beta_1b_1(X) + \beta_2b_2(X) + \varepsilon$$, and obtain coefficient estimates $\hat{\beta}_0 = 1$, $\hat{\beta}_1 = 1$, $\hat{\beta}_2 = 3$. Sketch the estimated curve between $X = -2$ and $X = 2$. Note the intercepts, slopes, and other relevant information.
+
+Solution: The curve is constant number one between -2 and 0, constant number two between 0 and 1, and linear line y = 3 - x between 1 and 2.
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+x = seq(from = -2,to = 2, length.out = 30)
+y = 1 + I(x<=2 & x>=0) - (x-1)* I(x<=2 & x>=1) + 
+  3* ((x-3)* I(x<=4 & x>=3) + I(x<=5 & x>=4))
+data = data.frame(x,y)
+plot(x,y,pch = 20, type = "b", col = "red", ylim = c(0,2))
+curve(1+x*0, from = -2, to = 0, add = TRUE, col = "blue", lwd=3)
+curve(2+x*0, from = 0, to = 1, add = TRUE, col = "violet", lwd=3)
+curve(3 - x, from = 1, to = 2, add = TRUE, col = "black", lwd=3)
+```
+
+\hfill
+
+Q5. consider two curves, $\hat{g}1$ and $\hat{g}_2$, defined by $$\hat{g}_1 = \arg\min_g\Biggl(\sum{i=1}^n(y_i - g(x_i))^2 + \lambda\int[g^{(3)}(x)]^2dx\biggr)$$ $$\hat{g}2 = \arg\min_g\Biggl(\sum{i=1}^n(y_i - g(x_i))^2 + \lambda\int[g^{(4)}(x)]^2dx\biggr)$$ where $g^{(m)}$ represents the mth derivative of $g$.
+
+(a) As $\lambda\rightarrow\infty$, will $\hat{g}_1$ or $\hat{g}_2$ have the smaller training RSS ?
+
+Solution: in this case, a large smoothing parameter $\lambda \rightarrow \infty$ forces $g^{(3)}(x)\rightarrow 0$ and makes $\hat{g}1 \rightarrow ax^2 + bx + c$. And $\lambda \rightarrow \infty$ forces $g^{(4)}(x)\rightarrow 0$ and makes $\hat{g}2 \rightarrow ax^3 + bx^2 + cx + d$. Therefore, $\hat{g}2$ is more flexible, and has less training RSS (higher order polynomial). 
+
+
+(b) As $\lambda\rightarrow\infty$, will $\hat{g}_1$ or $\hat{g}_2$ have the smaller test RSS ?
+
+Solution: give there is a trade-off between variance and bias when we increase flexibility, it is hard to say for sure which will has lower testing RSS. Since increasing order may overfit the data and produce significantly more variance than decreased bias, $\hat{g}_1$ could probably have less testing RSS.
+
+
+(c) For $\lambda = 0$, will $\hat{g}_1$ or $\hat{g}_2$ have the smaller training and test RSS ?
+
+Solution: when $\lambda = 0$, two functions are equally the same then we will have the same training and test RSS.
+
+
+\hfill
+
+Q9. This question uses the variables "dis" (the weighted mean of distances to five Boston employment centers) and "nox" (nitrogen oxides concentration in parts per 10 million) from the "Boston" data. We will treat "dis" as the predictor and "nox" as the response.
+
+
+(a) Use the "poly()" function to fit a cubic polynomial regression to predict "nox" using "dis". Report the regression output, and plot the resulting data and polynomial fits.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(MASS)
+library(pander)
+set.seed(1)
+fit = lm(nox ~ poly(dis, 3), data = Boston)
+options(digits=4)
+pander(summary(fit))
+dis.range = range(Boston$dis)
+dis.grid = seq(from = dis.range[1], to = dis.range[2], by = 0.1)
+preds = predict(fit, list(dis = dis.grid)) # has to be a list of X
+plot(nox ~ dis, data = Boston, col = "darkgrey")
+lines(dis.grid, preds, col = "red", lwd = 2)
+cat("all polynomial terms are significant.")
+```
+
+(b) Plot the polynomial fits for a range of different polynomial degrees (say, from 1 to 10), and report the associated residual sum of squares.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+rss = double(10);
+for (i in 1:10){
+  fit = lm(nox ~ poly(dis, i), data = Boston)
+  rss[i] = sum(fit$residuals^2)
+}
+plot(1:10, rss, xlab = "degree of polynomial", ylab = "RSS", 
+     type = "l", col = 'red', lwd =2)
+```
+
+(c) Perform cross-validation or another approach to select the optimal degree for the polynomial, and explain your results.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(boot)
+cv.error = double(10)
+for (i in 1:10){
+  fit = glm(nox ~ poly(dis, i), data = Boston)
+  cv.error[i] = cv.glm(Boston, fit,K = 5)$delta[1]
+}
+plot(1:10, cv.error, xlab = "degree of polynomial", ylab = "CV error", 
+     type = "l", col = 'red', lwd =2)
+cat("The optimal degree of polynomial is ", which.min(cv.error))
+```
+
+(d) Use the "bs()" function to fit a regression spline to predict "nox" using "dis". Report the output for the fit using four degrees of freedom. How did you choose the knots ? Plot the resulting fit.
+
+Solution: supposed we fit a cubic spline, and degree of freedom is K+3. This requires us to set 1 knot, which is about the mean value of distance variable.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(splines)
+fit = lm(nox ~ bs(dis, knots = c(4), degree = 3), data = Boston)
+summary(fit)
+# pred = predict(fit, list(dis = dis.grid))
+# plot(nox ~ dis, data = Boston, col = "darkgrey")
+# lines(dis.grid, preds, col = "red", lwd = 2)
+library(effects)
+plot(allEffects(fit))
+```
+
+(e) Now fit a regression spline for a range of degrees of freedom, and plot the resulting fits and report the resulting RSS. Describe the results obtained.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+rss = numeric(20) # change this number will change the optimal df
+for (i in 3:20){
+  fit = lm(nox ~ bs(dis, df = i), data = Boston)
+  rss[i] = sum(fit$residuals^2)
+}
+# take off the first two entries
+plot(3:20, rss[-c(1,2)], xlab = "spline degree of freedom", 
+     ylab = "RSS", type = "l", col = 'red', lwd =2, 
+     main = "linear fit") 
+cat("The optimal spline degree of freedom is ", which.min(rss[-c(1,2)]))
+```
+
+(f) Perform cross-validation or another approach in order to select the best degrees of freedom for a regression spline on this data. Describe your results.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+cv.error = numeric(20) 
+for (i in 3:20){
+  # has to be glm instead of lm() method
+  fit = glm(nox ~ bs(dis, df = i), data = Boston)
+  # how to read spline regression output?
+  cv.error[i] = cv.glm(Boston, fit, K = 10)$delta[1]
+}
+# take off the first two entries
+plot(3:20, cv.error[-c(1,2)], xlab = "spline degree of freedom", 
+     ylab = "CV error", type = "l", col = 'red', lwd =2, 
+     main = "cross-validation") 
+cat("The optimal spline degree of freedom is ", 
+    which.min(cv.error[-c(1,2)]))
+```
+
+\hfill
+
+Q10. This question relates to the "College" data set.
+
+
+(a) Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform forward stepwise selection on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+
+Solution: by the one-standard-error rule, it seems that model with 5 predictors are our best choice. 
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+set.seed(4)
+library(ISLR)
+attach(College)
+size = length(Outstate)
+train = sample(size, size/2); test = -train
+College.train = College[train, ]; College.test = College[test, ]
+
+library(leaps)
+# nvmax is the max size of subsets to examine
+fit = regsubsets(Outstate ~ ., data = College.train, 
+                 nvmax = 17, method = "forward")
+fit.summary = summary(fit)
+
+par(mfrow = c(1, 3))
+plot(fit.summary$cp, xlab = "Number of variables", 
+     ylab = "Cp", type = "l")
+min.cp = min(fit.summary$cp); std.cp = sd(fit.summary$cp)
+abline(h = min.cp + 1 * std.cp, col = "red", lty = 2)
+abline(h = min.cp - 1 * std.cp, col = "red", lty = 2)
+
+plot(fit.summary$bic, xlab = "Number of variables",
+     ylab = "BIC", type='l')
+min.bic = min(fit.summary$bic); std.bic = sd(fit.summary$bic)
+abline(h = min.bic + 1 * std.bic, col = "red", lty = 2)
+abline(h = min.bic - 1 * std.bic, col = "red", lty = 2)
+
+plot(fit.summary$adjr2, xlab = "Number of variables", 
+     ylab = "Adjusted Rsquare", type = "l", ylim = c(0.4, 0.84))
+max.adjr2 = max(fit.summary$adjr2); std.adjr2 <- sd(fit.summary$adjr2)
+abline(h = max.adjr2 + 1 * std.adjr2, col = "red", lty = 2)
+abline(h = max.adjr2 - 1 * std.adjr2, col = "red", lty = 2)
+
+cat("optimal model selected by CP algorithm is: ") 
+coef(fit, id = which.min(fit.summary$cp))
+
+cat("optimal model selected by BIC algorithm is: ") 
+coef(fit, id = which.min(fit.summary$bic))
+
+cat("optimal model selected by adjusted R square is: ") 
+coef(fit, id = which.max(fit.summary$adjr2))
+```
+
+
+(b) Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+
+Solution: we choose the one with minimum bic value.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(gam)
+# since Private is qualitative. 
+fit = gam(Outstate ~ Private + s(Room.Board, df = 5) + 
+            s(PhD, df = 2) + s(perc.alumni, df = 2) + 
+            s(Expend, df = 2) + s(Grad.Rate, df = 2), data=College.train)
+par(mfrow = c(2, 3))
+# Error in 1:object$nsdf : argument of length 0 ? 
+plot(fit , se=TRUE , col="blue") 
+```
+
+c) Evaluate the model obtained on the test set, and explain the results obtained.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+preds = predict(fit, College.test)
+err = mean((College.test$Outstate - preds)^2)
+tss = mean((College.test$Outstate - mean(College.test$Outstate))^2)
+rss = 1 - err / tss
+cat("The RSS of the model we choose is", rss, "using GAM")
+```
+
+
+(d) For which variables, if any, is there evidence of a non-linear relationship with the response ?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+pander(summary(fit)$anova)
+```
+
+Solution: ANOVA shows a strong evidence of non-linear relationship between "Outstate" and "Expend"", and a moderately strong non-linear relationship  between "Outstate" and "alumuni"
+
+
+
+

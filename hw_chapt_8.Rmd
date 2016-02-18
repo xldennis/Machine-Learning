@@ -1,0 +1,429 @@
+---
+title: "homework chapter 8"
+author: "Dennis Liu"
+date: "July 19th, 2015"
+output:
+  pdf_document:
+    fig_height: 4.3
+    fig_width: 8
+    keep_tex: yes
+  html_document:
+    fig_height: 4
+    fig_width: 8
+geometry: margin=1in
+setspace: onehalfspacing
+fontsize: 12pt
+---
+
+Q1. Draw an example (of your own invention) of a partition of two-dimensional feature space that could result from recursive binary splitting. Your example should contain at least six regions. Draw a decision tree corresponding to this partition. Be sure to label all aspects of your figures, including the regions $R_1,R_2,...$, the cutpoints $t_1,t_2,...$, and so forth.
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+par(xpd = NA)
+plot(NA, NA, type = "n", xlim = c(0,100), ylim = c(0,100), xlab = "X", ylab = "Y")
+lines(x = c(50,50), y = c(0,100))
+text(x = 50, y = 108, labels = c("t1"), col = "red")
+lines(x = c(0,50), y = c(50,50))
+text(x = -4, y = 50, labels = c("t2"), col = "red")
+lines(x = c(75,75), y = c(0,100))
+text(x = 75, y = 108, labels = c("t3"), col = "red")
+lines(x = c(25,25), y = c(50,100))
+text(x = 25, y = 108, labels = c("t4"), col = "red")
+lines(x = c(75,100), y = c(50,50))
+text(x = 70, y = 50, labels = c("t5"), col = "red")
+text(x = 20, y = 20, labels = c("R1"))
+text(x = 10, y = (100+50)/2, labels = c("R2"))
+text(x = 35, y = 75.5, labels = c("R3"))
+text(x = 62, y = 50, labels = c("R4"))
+text(x = 90, y = 75.5, labels = c("R5"))
+text(x = 90, y = 20, labels = c("R6"))
+```
+
+Q2. It is mentioned in Section 8.2.3 that boosting using depth-one trees (or stumps) leads to an additive model : that is, a model of the form $f(X) = \sum_{j = 1}^p f_j(X_j)$ Explain why this is the case.
+
+Solution: By referring to 8.2, we run the Boosting for Regression Trees algorithm
+
+- we have $\hat{f}(x) = 0$ and $r_i = y_i\ \forall \ i$ in the training set. 
+
+- we let $\hat{f}^1(x) = c_1I(x_1 < t_1) + c_1'$ and $\hat{f}(x) = 0 +\lambda \hat{f}^1(x)$, $r_i = y_i - \lambda\hat{f}^1(x_i)\ \forall i$ in the training set.
+
+- next, we have $\hat{f}^2(x) = c_2I(x_2 < t_2) + c_2'$ and $\hat{f}(x) = \hat{f}(x) + \lambda\hat{f}^2(x) = \lambda\hat{f}^1(x) + \lambda\hat{f}^2(x)$, $r_i = y_i - \lambda\hat{f}^1(x_i) - \lambda\hat{f}^2(x_i)\ \forall i$ in the training set. 
+
+- iteration throughout i and we get $\hat{f}(x) = \lambda\hat{f}^1(x) + \lambda\hat{f}^2(x) + \cdots + \lambda\hat{f}^i(x) = \sum_{j = 1}^p f_j(x_j)$. 
+
+\hfill
+
+Q3. Consider the Gini index, classification error, and cross-entropy in a simple setting with two classes. Create a single plot that displays each of these quantities as a function of $\hat{p}{m1}$. The $x$-axis should display $\hat{p}{m1}$, ranging from 0 to 1, and the $y$-axis should display the value of the Gini index, classification error, and entropy.
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+p = seq(0, 1, 0.01)  # 
+gini.index = 2 * p * (1 - p) # two classes
+class.error = 1 - pmax(p, 1 - p) #definition 8.5 classification error rate
+cross.entropy = - (p * log(p) + (1 - p) * log(1 - p))
+matplot(p, cbind(gini.index, class.error, cross.entropy), 
+        col = c("red", "yellow", "blue"), ylab = "error rate")
+```
+
+\hfill
+
+Q4. This question relates to the plots in Figure 8.12.
+
+(a) Sketch the tree corresponding to the partition of the predictor space illustrated in the left-hand panel of Figure 8.12. The numbers inside the boxes indicate the mean of $Y$ within each region.
+
+![](./4a.png)
+
+(b) Create a diagram similar to the left-hand panel of Figure 8.12, using the tree illustrated in the right-hand panel of the same figure. You should divide up the predictor space into the correct regions, and indicate the mean for each region.
+
+```{r, echo=F,message=FALSE,comment=NA, warning=FALSE}
+par(xpd=NA)
+plot(NA, NA, type="n", xlim=c(-2,2), ylim=c(-3,3), xlab="X1", ylab="X2")
+# X2 < 1
+lines(x=c(-2,2), y=c(1,1))
+# X1 < 1 with X2 < 1
+lines(x=c(1,1), y=c(-3,1))
+text(x=(-2+1)/2, y=-1, labels=c(-1.80))
+text(x=1.5, y=-1, labels=c(0.63))
+# X2 < 2 with X2 >= 1
+lines(x=c(-2,2), y=c(2,2))
+text(x=0, y=2.5, labels=c(2.49))
+# X1 < 0 with X2<2 and X2>=1
+lines(x=c(0,0), y=c(1,2))
+text(x=-1, y=1.5, labels=c(-1.06))
+text(x=1, y=1.5, labels=c(0.21))
+```
+
+\hfill
+
+Q5. Suppose we produce ten bootstrapped samples from a data set containing red and green classes. We then apply a classification tree to each bootstrapped sample and, for a specific value of X, produce 10 estimates of P(Class is Red|X) :
+$$0.1,0.15,0.2,0.2,,0.55,0.6,0.6,0.65,0.7,0.75$$
+There are two common ways to combine these results together into a single class prediction. One is the majority vote approach discussed in this chapter. The second approach is to classify based on the average probability. In this example, what is the final classification under each of these two approaches ?
+
+Solution: with the majority vote approach, we classify $X$ as Red as there are 6 estimates with probability higher than 0.5. With the average probability approach, we classify $X$ as Green as the average of the 10 probabilities is 0.45.
+
+\hfill
+
+Q6. Provide a detailed explanation of the algorithm that is used to fit a regression tree.
+
+Solution: this is how we do the algorithm to fit a regression tree,
+
+- first we do top-down and greedy recursive binary splitting on the data. For each loop, one predictor X and one cutpoint s is chosen to make the greatest possible reduction in RSS. The process wil not end until some minimal number of observations is present on each of the leaves (e.g., 5).
+
+- then we apply cost complexity pruning of this larger tree formed in step one. We consider a sequence of trees indexed by a nonnegative tuning parameter a tuning parameter, $\alpha$, also known as learning rate.For each value of $\alpha$ there corresponds a subtree $T \subset T_0$($T_0$ is the largest tree we get from step one) such that 
+$$\sum_{m=i}^{|T|}\sum_{i:x_i\in R_m}(y_i - \hat y_{R_m})^2 + \alpha |T|.$$ 
+Here $\alpha$ penalize the size of tree labeled as $|T|$. When $\alpha=0$ we have the original tree, and as $\alpha$ increases we get a more pruned version of the tree.
+
+- last step is to use K-fold Cross Validation to choose $\alpha$. For each fold, repeat steps 1 and 2, and then evaluate the MSE as a function of $\alpha$ in the validation set. And then apply this $\alpha$ to step two formula on the entire dataset. 
+
+
+Q7. In the lab, we applied random forests to the "Boston" data using "mtry = 6" and using "ntree = 25" and "ntree = 500". Create a plot displaying the test error resulting from random forests on this data set for a more comprehensive range of values for "mtry" and "ntree". Describe the results obtained.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(MASS)
+library(randomForest)
+set.seed(1)
+p = ncol(Boston)
+size = nrow(Boston); train = sample(1:size, size/2)
+trainx = Boston[train, -14]; testx = Boston[-train, -14] 
+trainy = Boston[train, 14]; testy = Boston[-train, 14]
+boston1 = randomForest(x = trainx, y = trainy, xtest = testx,
+                       ytest = testy, mtry = p - 1, ntree = 500)
+boston2 = randomForest(x = trainx, y = trainy, xtest = testx,
+                       ytest = testy, mtry = (p - 1)/2, ntree = 500)
+boston3 = randomForest(x = trainx, y = trainy, xtest = testx,
+                       ytest = testy, mtry = sqrt(p-1), ntree = 500)
+
+plot(1:500, boston1$test$mse, col = "red", type = "l", 
+     xlab = "Number of Trees", ylab = "Test Error", ylim = c(10,20))
+lines(1:500, boston2$test$mse, col = "yellow", type = "l")
+lines(1:500, boston3$test$mse, col = "blue", type = "l")
+legend("topright", c("mtyr = p", "mtry = p/2", "mtry = sqrt(p)"), 
+       col = c("red", "yellow", "blue"), cex = 1, lty = 1)
+# cat("The lowest MSE correspond to when the number of tree is", 
+#     which.min(boston2$test$mse))
+```
+
+- the argument mtry=6 indicates that 6 predictors will be considered for each split of the tree
+- test error could be super high for small number of trees and it decreases as the number of trees increases. 
+- test MSE is lower if we just include portion of predictors (e.g., p/2) than all predictors. 
+
+\hfill
+
+Q8. In the lab, a classification tree was applied to the "Carseats" data set after converting "Sales" into a qualitative response variable. Now we will seek to predict "Sales" using regression trees and related approaches, treating the response as a quantitative variable.
+
+
+(a) Split the data set into a training set and a test set.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE} 
+library(ISLR)
+set.seed(1)
+size = nrow(Carseats)
+train = sample((1:size), size/2)
+data.train = Carseats[train, ]; data.test = Carseats[-train, ]
+```
+
+(b) Fit a regression tree to the training set. Plot the tree, and interpret the results. What test error rate do you obtain ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE,fig.height=10,fig.width=10}
+library(tree)
+reg.tree = tree(Sales ~ ., data = data.train)
+summary(reg.tree)
+plot(reg.tree); text(reg.tree, pretty = 2)
+yhat = predict(reg.tree, newdata = data.test)
+cat("The Test Error is ", mean((yhat - data.test$Sales)^2))
+```
+
+(c) Use cross-validation in order to determine the optimal level of tree complexity. Does pruning the tree improve the test error rate ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+cv.tree = cv.tree(reg.tree)
+plot(cv.tree$size, cv.tree$dev, type = "b")
+tree.min = which.min(cv.tree$dev)
+points(cv.tree$size[tree.min], cv.tree$dev[tree.min], 
+       col = "red", cex = 2, pch=13)
+cat("The prunning tree has size of ", cv.tree$size[tree.min], " nodes")
+
+plot(cv.tree$k, cv.tree$dev, type = "b")
+tree.min = which.min(cv.tree$dev)
+points(cv.tree$k[tree.min], cv.tree$dev[tree.min], 
+       col = "red", cex = 2, pch=13)
+cat("The prunning tree has alpha of ", cv.tree$k[tree.min])
+```
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE,fig.height=10,fig.width=10}
+cat("optimal model pruned by cross validation algorithm is the
+    following ") 
+prune.model = prune.tree (reg.tree ,best=cv.tree$size[tree.min])
+plot(prune.model ); text(prune.model ,pretty =0)
+yhat = predict(prune.model, newdata = data.test)
+error = mean((yhat - data.test$Sales)^2)
+cat("The Test Error after we pruning the tree is ", 
+    mean((yhat - data.test$Sales)^2))
+```
+
+(d) Use the bagging approach in order to analyze this data. What test error rate do you obtain ? Use the "importance()" function to determine which variables are most important.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+bagging = randomForest(Sales ~ ., data = data.train, 
+                       mtry = ncol(data.test) -1 , ntree = 500, 
+                       importance = TRUE)
+yhat =  predict(bagging, newdata = data.test)
+error = mean((yhat - data.test$Sales)^2)
+cat("The Test Error is decreasing down to ", error)
+importance(bagging)
+varImpPlot(bagging)
+# bagging is a special case of random forest when mtry = parameter
+```
+
+- "Price" and "ShelveLoc" are the two most important variables.
+
+
+(e) Use random forests to analyze this data. What test error rate do you obtain ? Use the "importance()" function to determine which variables are most important. Describe the effect of $m$, the number of variables considered at each split, on the error rate obtained.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+randomf = randomForest(Sales ~ ., data = data.train, mtry = 5, 
+                      ntree = 500, importance = TRUE)
+yhat = predict(randomf, newdata = data.test)
+error = mean((yhat - data.test$Sales)^2)
+cat("The Test Error when mtry is half of p is ", error)
+importance(randomf)
+varImpPlot(randomf)
+```
+
+- as the number of variables considered at each split increases, the test error decreased (which is against what I found in Q7)
+- "Price" and "ShelveLoc" are still the two most important variables.
+
+\hfill
+
+Q9. This problem involves the "OJ" data set which is part of the "ISLR" package.
+
+
+(a) Create a training set containing a random sample of 800 observations, and a test set containing the remaining observations.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+set.seed(1)
+size = nrow(OJ)
+train = sample(1:size, 800)
+data.train = OJ[train, ]; data.test <- OJ[-train, ]
+```
+
+(b) Fit a tree to the training data, with "Purchase" as the response and the other variables except for "Buy" as predictors. Use the "summary()" function to produce summary statistics about the tree, and describe the results obtained. What is the training error rate ? How many terminal nodes does the tree have ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+class.tree = tree(Purchase ~ ., data = data.train)
+summary(class.tree)
+```
+- The regression tree has training error of 0.165 and terminal nodes of 8.
+
+(c) Type in the name of the tree object in order to get a detailed text output. Pick one of the terminal nodes, and interpret the information displayed.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+class.tree
+```
+- Node 11, it is a terminal node with asterisk.
+- The split criterion is whether PriceDiff is greater than 0.195
+- There are 101 observations in that branch with a deviance of 139.2
+- Since 54% of the observations in that branch take the value of CH, which outnumber the percentage of MM, it is predicted as CH.
+
+(d) Create a plot of the tree, and interpret the results.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE,fig.height=10,fig.width=10}
+plot(class.tree); text(class.tree ,pretty =0)
+```
+
+- This is compatible from tree output. Noted that node 11 is roughtly in the middle among the terminal node. 
+
+(e) Predict the response on the test data, and produce a confusion matrix comparing the test labels to the predicted test labels. What is the test error rate ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+tree.pred = predict(class.tree, data.test, type = "class")
+x = table(tree.pred, data.test$Purchase)
+cat ("The Test Error computed by the confusion matrix is ", 
+     1 - (x[1]+x[4])/sum(x))
+```
+
+f) Apply the "cv.tree()" function to the training set in order to determine the optimal size tree.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+(cv.tree = cv.tree(class.tree, FUN = prune.misclass))
+```
+- size 2 seems to be enough
+
+(g) Produce a plot with tree size on the $x$-axis and cross-validated classification error rate on the $y$-axis.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+plot(cv.tree$size, cv.tree$dev, type = "b",xlab = "Tree size", ylab = "Deviance")
+tree.min = which.min(cv.tree$dev)
+points(cv.tree$size[tree.min], cv.tree$dev[tree.min], 
+       col = "red", cex = 2, pch=13)
+```
+
+(h) Which tree size corresponds to the lowest cross-validated classification error rate ?
+
+- size 5 and 8 does have the same validation error (minimum value) but for simplicity, I will choose 5-node tree for simplicity.
+
+(i) Produce a pruned tree corresponding to the optimal tree size obtained using cross-validation. If cross-validation does not lead to selection of a pruned tree, then create a pruned tree with five terminal nodes.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+prune.model = prune.misclass(class.tree, best = 5)
+plot(prune.model); text(prune.model, pretty = 0)
+
+```
+
+
+(j) Compare the training error rates between the pruned and unpruned trees. Which is higher ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+summary(class.tree)
+summary(prune.model)
+```
+- they have the same missclassification error rate regardless of pruning. 
+
+
+(k) Compare the test error rates between the pruned and unpruned trees. Which is higher ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+prune.pred = predict(prune.model, data.test, type = "class")
+x = table(prune.pred, data.test$Purchase)
+cat ("The Test Error of pruned tree is ", 1 - (x[1]+x[4])/sum(x))
+```
+
+- They are both the same (vs. result in part (e)). 
+
+\hfill
+
+Q10. We now use boosting to predict “Salary” in the “Hitters” data set.
+
+(a) Remove the observations for whom the salary information is unknown, and then log-transform the salaries.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+Hitters = na.omit(Hitters)
+Hitters$Salary = log(Hitters$Salary)
+```
+
+(b) Create a training set consisting of the first 200 observations, and a test set consisting of the remaining observations.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+train = 1:200
+data.train = Hitters[train, ]; data.test = Hitters[-train, ]
+```
+
+(c) Perform boosting on the training set with 1000 trees for a range of values of the shrinkage parameter $\lambda$. Produce a plot with different shrinkage values on the $x$-axis and the corresponding training set MSE on the $y$-axis.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+library(gbm)
+set.seed(1)
+pows = seq(-10, -0.2, by = 0.1)
+lambdas = 10^pows # 100 random lambda
+train.err = rep(NA, length(lambdas))
+for (i in 1:length(lambdas)) {
+    boost = gbm(Salary ~ ., data = data.train, distribution = "gaussian"
+                , n.trees = 1000, shrinkage = lambdas[i])
+    prediction = predict(boost, data.train, n.trees = 1000)
+    train.err[i] = mean((prediction - data.train$Salary)^2)
+}
+plot(lambdas, train.err, type = "b", 
+     xlab = "Shrinkage values", ylab = "Training MSE", col =4)
+```
+
+
+(d) Produce a plot with different shrinkage values on the $x$-axis and the corresponding test set MSE on the $y$-axis.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+set.seed(3)
+length =length(data.test$Salary)
+test.err = rep(NA, length)
+for (i in 1:length) {
+    boost = gbm(Salary ~ ., data = data.train, distribution = "gaussian"
+                , n.trees = 1000, shrinkage = lambdas[i])
+    prediction = predict(boost, data.test, n.trees = 1000)
+    test.err[i] = mean((prediction - data.test$Salary)^2)
+}
+plot(lambdas[1:length], test.err, type = "b", 
+     xlab = "Shrinkage values", ylab = "Test MSE", col = 3)
+cat("The optimal lambda we obtained is ", lambdas[which.min(test.err)],
+    " with minimum test MSE of ", min(test.err))
+```
+
+(e) Compare the test MSE of boosting to the test MSE that results from applying two of the regression approaches seen in Chapters 3 and 6.
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+library(glmnet)
+fit1 = lm(Salary ~ ., data = data.train)
+pred1 = predict(fit1, data.test)
+cat("test MSE by linear regression approach is ", 
+    mean((pred1 - data.test$Salary)^2))
+x = model.matrix(Salary ~ ., data = data.train); y = data.train$Salary
+x.test = model.matrix(Salary ~ ., data = data.test)
+fit2 = glmnet(x, y, alpha = 0)
+pred2 = predict(fit2, s = 0.01, newx = x.test)
+cat("test MSE by ridge regression approach is ", 
+    mean((pred2 - data.test$Salary)^2))
+```
+    
+- Linear and ridge perform better than boosting
+
+
+(f) Which variables appear to be the most important predictors in the boosted model ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+boost = gbm(Salary ~ ., data = data.train, distribution = "gaussian",
+            n.trees = 1000, shrinkage = lambdas[which.min(test.err)])
+summary(boost)
+```
+
+- "CAtBat" is the most important variable in the boost model.
+
+(g) Now apply bagging to the training set. What is the test set MSE for this approach ?
+
+```{r, echo=T,message=FALSE,comment=NA,warning=FALSE}
+set.seed(5)
+size = ncol(data.train)
+bagging = randomForest(Salary ~ ., data = data.train, mtry = size-1,
+                       ntree = 500)
+prediction = predict(bagging, newdata = data.test)
+cat("test MSE by bagging approach is ", 
+    mean((prediction - data.test$Salary)^2))
+```
+
+The test MSE for bagging is smallest among all the method used in this case. 
+
+

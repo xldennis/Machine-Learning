@@ -1,0 +1,443 @@
+---
+title: "homework chapter 3"
+author: "Dennis Liu"
+date: "June 20th, 2015"
+output:
+  pdf_document:
+    fig_height: 4.3
+    fig_width: 8
+    keep_tex: yes
+  html_document:
+    fig_height: 4
+    fig_width: 8
+geometry: margin=1in
+setspace: onehalfspacing
+fontsize: 12pt
+---
+
+
+
+# Statistical Learning - Chapter 3
+
+## Exercises
+### Conceptual
+1. Describe the null hypotheses to which the p-values given in Table 3.4 correspond. Explain what conclusions you can draw based on these p-values. Your explanation should be phrased in terms of `sales`, `TV`, `radio`, and `newspaper`, rather than in terms of the coefficients of the linear model.
+
+- Null hypothesis to which the p-values in Table 3.4 correspond is that there is no effect of `TV`, `radio` or `newspaper` advertising effect on sales. 
+- $H_0^{(1)}$: $\beta_1 = 0$, but the probability of null effect of `TV` on sales is really small (i.e., <.0001). We reject $H_0^{(1)}$ and conclude that advertising on `TV` does have effect on sales.
+- $H_0^{(2)}$: $\beta_2 = 0$, but the probability of null effect of `radio` on sales is really small (i.e., <.0001). We reject $H_0^{(2)}$ and conclude that advertising on `radio` does have effect on sales.
+- $H_0^{(3)}$: $\beta_3 = 0$, and the probability of null effect of `newspaper` on sales is quite large (i.e., 0.8599). There is not sufficient evidence to reject $H_0^{(3)}$ and we conclude that advertising on `newspaper` does not have effect on sales.
+
+\hfill
+
+3. Suppose we have a data set with five predictors, X1 = GPA, X2 = IQ, X3 = Gender (1 for Female and 0 for Male), X4 = Interaction between GPA and IQ, and X5 = Interaction between GPA and Gender. The response is starting salary after graduation (in thousands of dollars). Suppose we use least squares to fit the model, and get $\hat \beta_0 = 50$, $\hat \beta_1 =20$, $\hat \beta_2 = 0.07$, $\hat \beta_3 = 35$, $\hat \beta_4 = 0.01$, $\hat \beta_5 = -10$.
+
+
+(a) Which answer is correct, and why? 
+
+i. For a fixed value of IQ and GPA,males earn more on average than females. 
+ii. For a fixed value of IQ and GPA, females earn more on average than males.
+iii. For a fixed value of IQ and GPA,males earn more on average than females provided that the GPA is high enough. 
+iv. For a fixed value of IQ and GPA, females earn more on average than males provided that the GPA is high enough. 
+
+- The regression line is: $\hat y = 50 + 20 GPA + 0.07 IQ + 35 Gender + 0.01 (GPA) IQ - 10 (GPA) Gender$ 
+- For males (Gender = 0), the expected starting salary is $\hat y = 50 + 20 GPA + 0.07 IQ + 0.01 (GPA) IQ$ (1)
+- For females (Gender = 1), the expected starting salary is $\hat y = 85 + 10 GPA + 0.07 IQ + 0.01 (GPA) IQ$ (2)
+- Therefore, comparing (1) and (2), males earn more when GPA > 3.5 and hence `the choice is iii`
+
+(b) Predict the salary of a female with IQ of 110 and a GPA of 4.0.
+
+- $\hat y = 85 + 10*4 + 0.07*110 + 0.01*110*4 = 137.1$, which is $137100.
+
+(c) True or false: Since the coefficient for the GPA/IQ interaction term is very small, there is very little evidence of an interaction effect. Justify your answer.
+
+- False, to verify if there is any evidence against an interaction effect between `GPA` and `IQ`, we need to test null hypothesis of whether $\hat \beta_4 = 0$.
+
+\hfill
+
+3.  I collect a set of data (n = 100 observations) containing a single predictor and a quantitative response. I then fit a linear regression model to the data, as well as a separate cubic regression, i.e., $Y = \beta_0  + \beta_1 X +\beta_2 X^2 +\beta_3 X^3 + \epsilon$
+
+
+(a) Suppose that the true relationship between X and Y is linear, i.e. $Y = \beta_0  + \beta_1 X + \epsilon$. Consider the training residual sum of squares (RSS) for the linear regression, and also the training RSS for the cubic regression. Would we expect one to be lower than the other, would we expect them to be the same, or is there not enough information to tell? Justify your answer.
+
+- The Figure 2.9 tells us that training MSE would decline monotonically as flexibility increases. Therefore I expect the training RSS for the cubic regression (vs. linear regression) is slower as more data points are fitted to be included in the more flexible model.
+
+(b) Answer (a) using test rather than training RSS.
+
+- Figure 2.9 also tells us there is an opimal point of flexibility where test MSE is smallest. Since the true relationship between x and y is linear and cubic regression may overfit the data, an linear regression (vs. cubic regression) will produce lower test RSS.
+
+c) Suppose that the true relationship between X and Y is not linear, but we don’t know how far it is from linear. Consider the training RSS for the linear regression, and also the training RSS for the cubic regression. Would we expect one to be lower than the other, would we expect them to be the same, or is there not enough information to tell? Justify your answer.
+
+- As stated in (a), Cubic regression (vs. linear regression) has higher flexibility and hence lower training RSS.
+
+(d) Answer (c) using test rather than training RSS.
+
+- It's up to how close the true relationship is to the linear. The bias-variance tradeoff states that with the increase of flexibility, variance would certainly increases but the rate of decrease in bias is up to the true relationship. If the true relationship is close to linear, there is little decrease of bias as flexibilitiy increases, hence increasing RSS (bias + variance). But if the true relationship is close to cubic, then we would expect the RSS for cubic regression is lower for testing data. 
+
+\hfill
+
+5. Consider the fitted values that result from performing linear regres- sion without an intercept. In this setting, the ith fitted value takes the form $$\hat y_i = x_i \hat \beta$$ where $$\hat \beta = (\sum_{i=1}^{n} x_iy_i )/(\sum_{i'=1}^{n}x_{i'}^2)$$ Show that we can write $$\hat y_i = \sum_{i'=1}^{n} a_{i'} y_{i'}$$ What is $a_{i'}$?
+
+
+- $\hat y_i = x_i \hat \beta$ = $x_i (\sum_{j=1}^{n} x_j y_j )/(\sum_{i'=1}^{n} x_{i'}^2)$ = $(\sum_{j=1}^{n} x_i x_j) x (y_j)/ (\sum_{i'=1}^{n} x_{i'}^2)$
+- Replacing j with i', $a_{i'} = (\sum_{j=1}^{n} x_i x_j) / (\sum_{i'=1}^{n} x_{i'}^2)$
+
+\hfill
+
+6. Using (3.4), argue that in the case of simple linear regression, the
+least squares line always passes through the point ($\bar x, \bar y$).
+
+- Since $\hat \beta_0 = \bar y - \hat \beta_1 \bar x$ by 3.4
+- Plug that in the estimated linear equation $\hat y = \hat \beta_0 + \hat \beta_1 x$ = $(\bar y - \hat \beta_1 \bar x) + \hat \beta_1 x$ = $\hat \beta_1 (x - \bar x) + \bar y$ 
+- if $x = \bar x$ and plug in the equation above, we have $\hat y = \bar y$, therefore least squares line always passes through the point ($\bar x, \bar y$).
+
+\hfill
+
+### Applied
+9. This question involves the use of multiple linear regression on the Auto data set.
+
+
+(a) Produce a scatterplot matrix which includes all of the variables in the data set.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+library(knitr)
+library(pander)
+Auto = read.csv("data/Auto.csv", header = T,na.strings = "?")
+pairs(Auto, panel = panel.smooth)
+```
+
+(b) Compute the matrix of correlations between the variables using the function `cor()`. You will need to exclude the `name` variable, which is qualitative.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE, results ='hide'}
+# Name = names(Auto)
+# Auto = matrix(unlist(Auto), nrow = 392, 9)
+# colnames(Auto) = Name
+# as.data.frame(Auto)
+# lapply(temp, as.numeric)
+```
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+# sapply(Auto, class), we found something wrong with variable horsepower
+# get rid of char data which is the last column
+cor(subset(Auto, select=-name))
+```
+
+(c) Use the `lm()` function to perform a multiple linear regression with `mpg` as the response and all other variables except `name` as the predictors. Use the `summary()` function to print the results. Comment on the output. For instance:
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit = lm(mpg ~. - name, data = Auto)
+pander(summary(Fit)$coef)
+```
+
+i. Is there a relationship between the predictors and the response?
+-  From the p-value of the F-statistic, there is a relationship between the predictors and the response.
+
+ii. Which predictors appear to have a statistically significant relationship to the response?
+- The `displacement`,`weight`,`year`,`origin` have a significant relationship to the response as each of their p-value is less than 0.05. 
+
+iii. What does the coefficient for the year variable suggest?
+- Given all the other predictors fixed, the `mpg` increases by 0.7508 for every one year increases (i.e., the car becomes more fuel efficient)
+
+(d) Use the plot() function to produce diagnostic plots of the linear regression fit. Comment on any problems you see with the fit. Do the residual plots suggest any unusually large outliers? Does the leverage plot identify any observations with unusually high leverage?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+par(mfrow=c(2,2))
+plot(Fit)
+```
+
+- `Residual vs Fitted`: The red line is a smooth fit to the residuals, which shows a U-shape pattern and indicates non-linear relationship in the data. In addition, the variance of residuals seems to increase with the change of fitted values. 
+- `Normal QQ`: No problem of normality though slightly light tail of the right side. 
+- `Variance of Residuals vs Fitted`: Red line indicates constant variance across x since it's quite flat. This clears our worries of nonconstant variances of residuals.
+- `Residuals vs Leverage`: point 14 has high leverage though it has low residuals.
+
+(e) Use the `*` and `:` symbols to fit linear regression models with interaction effects. Do any interactions appear to be statistically significant?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit2 = lm(mpg ~ . + year:weight + year:origin - name, data = Auto)
+pander(summary(Fit2)$coef)
+```
+
+- There is a significant interaction effect between `year` and `weight` on `mpg`, p<0.0001. But `year` and `origin` do not interplay on `mpg`, p>0.05.
+
+(f) Try a few different transformations of the variables, such as $log(x)$, $sqrt(x)$, $x^2$. Comment on your findings.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit3 = lm(mpg ~ . + log(cylinders) + I(acceleration^2) + 
+            sqrt(origin) - name, data = Auto)
+summary(Fit3)$coef
+```
+
+- log-transformed `cylinder` is now significant associated with `mpg` and so does squar-transformed `acceleration`, p < 0.05. But square-root-transformed `origin` still does not related significantly to `mpg`, p > 0.05.
+
+\hfill
+
+11. In this problem we will investigate the t-statistic for the null hypothesis $H_0$: $\beta = 0$ in simple linear regression without an intercept. To begin, we generate a predictor x and a response y as follows.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+set.seed(1)
+x=rnorm(100)
+y=2*x+rnorm(100)
+```
+
+(a) Perform a simple linear regression of y onto x, without an intercept. Report the coefficient estimate $\hat \beta$, the standard error of this coefficient estimate, and the t-statistic and p-value associated with the null hypothesis $H_0$: $\beta = 0$. You can perform regression without an intercept using the command $lm(y~x+0)$.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit11a = lm(y~x+0) # y onto x
+pander(summary(Fit11a)$coef)
+```
+
+- The p-value is less than 0.05. We reject the null hypothesis $H_0$: $\beta = 0$ and conclude that the coefficient is statistically significant.
+
+(b) Now perform a simple linear regression of x onto y without an intercept, and report the coefficient estimate, its standard error, and the corresponding t-statistic and p-values associated with the null hypothesis $H_0$: $\beta = 0$. Comment on these results.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit11b = lm(x~y+0) # x onto y
+pander(summary(Fit11b)$coef)
+```
+
+- The p-value is less than 0.05. We reject the null hypothesis $H_0$: $\beta = 0$ and conclude that the coefficient is statistically significant.
+
+(c) What is the relationship between the results obtained in (a) and (b)?
+
+- they have the same t-statistics and p-value.
+
+(d) For the regression of Y onto X without an intercept, the t-statistic for $H_0$: $\beta = 0$ takes the form $\hat \beta/SE(\hat \beta)$, where $\hat \beta$ is given by (3.38), and where $$SE(\hat \beta) = \sqrt{\frac{\sum_{i=1}^{n}(y_i - x_i\hat\beta)^2}{(n-1)\sum_{i'=1}^{n}x_{i'}^2}}$$
+(These formulas are slightly different from those given in Sections 3.1.1 and 3.1.2, since here we are performing regression without an intercept.) Show algebraically, and confirm numerically in R, that the t-statistic can be written as
+![formula](http://snag.gy/KyD3p.jpg)
+
+- differentiating the LOSS function Q = $\sum (y_i - \beta_i x_i)^2$
+- $\frac{\partial \sum (y_i - \beta x_i)^2}{\partial \beta} = 2\sum (y_i - \beta x_i)(-x_i) = 0$
+- $\hat \beta = \frac{\sum y_i x_i}{\sum x_i^2}$
+- $$\begin{array}{l@{{}={}}l}
+t
+    & \hat \beta/SE(\hat \beta)\\
+    & \frac{\sum y_i x_i}{\sum x_i^2} / \sqrt{\frac{\sum_{i=1}^{n}(y_i - x_i\hat\beta)^2}{(n-1)\sum_{i'=1}^{n}x_{i'}^2}}\\
+    & \frac {\sqrt{n-1} \sum{x_i y_i}} {\sqrt{\sum{x_i^2} \sum{(y_i - x_i \beta)^2}}} \\
+    & \frac {\sqrt{n-1} \sum{x_i y_i}} {\sqrt{\sum{x_i^2} \sum{(y_i^2 - 2 \beta x_i y_i + x_i^2 \beta^2)}}}\\
+    & \frac {\sqrt{n-1} \sum{x_i y_i}} {\sqrt{\sum{x_i^2} \sum{y_i^2} - \sum{x_i^2} \beta (2 \sum{x_i y_i} - \beta \sum{x_i^2})}}\\
+    & \frac {\sqrt{n-1} \sum{x_i y_i}} {\sqrt{\sum{x_i^2} \sum{y_i^2} - \sum{x_i y_i} (2 \sum{x_i y_i} - \sum{x_i y_i})}}\\
+    & \frac {\sqrt{n-1} \sum{x_i y_i}} {\sqrt{\sum{x_i^2} \sum{y_i^2} - (\sum{x_i y_i})^2 }} 
+\end{array}$$
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE} 
+cbind('t-statistics', (sqrt(length(x)-1) * sum(x*y)) 
+      / (sqrt(sum(x*x) * sum(y*y) - (sum(x*y))^2)))       
+# this is exactly the t-statistics in the table                              
+```
+
+(e) Using the results from (d), argue that the t-statistic for the re- gression of `y onto x` is the same as the t-statistic for the regression of `x onto y`.
+
+- we replace x with y' and y with x' above, and we would get exactly the same formula.
+
+(f) In R, show that when regression is performed with an intercept, the t-statistic for $H_0$: $\beta = 0$ is the same for the regression of `y onto x` as it is for the regression of `x onto y`.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit11fyx = lm(y~x) # y onto x
+pander(summary(Fit11fyx)$coef)    
+Fit11fxy = lm(x~y) # x onto y
+pander(summary(Fit11fxy)$coef)
+```
+
+- as shown above, their t-statistics is the same.
+
+\hfill
+
+13. In this exercise you will create some simulated data and will fit simple linear regression models to it. Make sure to use `set.seed(1)` prior to starting part (a) to ensure consistent results.
+
+
+(a) Using the `rnorm()` function, create a vector, `x`, containing 100 observations drawn from a N (0, 1) distribution. This represents a feature, X.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+set.seed(1)
+x=rnorm(100, mean = 0, sd = 1)
+```
+
+(b) Using the `rnorm()` function, create a vector, `eps`, containing 100 observations drawn from a N(0,0.25) distribution i.e. a normal distribution with mean zero and variance 0.25.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+eps=rnorm(100, mean = 0, sd = 0.5)
+```
+
+(c) Using `x` and `eps`, generate a vector y according to the model
+$$Y = -1 + 0.5 X + \epsilon$$.
+What is the length of the vector `y`? What are the values of $\beta_0$ and $\beta_1$ in this linear model?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+y = -1 + 0.5*x + eps
+cbind('length of y',length(y))
+```
+
+- The $\beta_0 = -1$ and $\beta_1 = 0.5$ in this linear model.
+
+(d) Create a scatterplot displaying the relationship between x and y. Comment on what you observe.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+plot(x, y, col = "green")
+```
+
+- I observe a moderately strong positive linear relationship between x and y.
+
+(e) Fit a least squares linear model to predict y using x. Comment on the model obtained. How do $\hat \beta_0$ and $\hat \beta_1$ compare to $\beta_0$ and $\beta_1$?
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit13e = lm(y~x)
+summary(Fit13e)
+```
+
+- It's really close to real $\beta_0$ and $\beta_1$. And the model is significant, F(1,98) = 85, p < .05. $\hat \beta_0 = -1.089$ and $\hat \beta_1 = 0.499$
+
+(f) Display the least squares line on the scatterplot obtained in (d). Draw the population regression line on the plot, in a different color. Use the legend() command to create an appropriate legend.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+plot(x, y, col = "black")
+abline(Fit13e, col = 'green')
+abline(-1, 0.5, lwd = 3, col='yellow')
+legend('bottomright', c("Least Square line", "Pop. Regression Line"), 
+       fill=c("green","yellow"))
+```
+
+(g) Now fit a polynomial regression model that predicts y using x and x2. Is there evidence that the quadratic term improves the model fit? Explain your answer.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit13g = lm(y~x + I(x^2))
+summary(Fit13g)
+```
+
+- The quadratic term is not significant, p>0.05 and the R-square does not seem to increase significantly when we include quadratic term.
+
+(h) Repeat (a)–(f) after modifying the data generation process in such a way that there is less noise in the data. The model (3.39) should remain the same. You can do this by decreasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+x = rnorm(n=100, mean=0, sd=1)
+eps = rnorm(n=100, mean=0, sd=0.10)
+y = -1 + 0.5*x + eps
+par(mfrow=c(1,2))
+plot(x, y, col="green")
+Fit13h = lm(y~x)
+summary(Fit13h)
+plot(x, y, col = "black")
+abline(Fit13h, col = 'green')
+abline(-1, 0.5, lwd = 3, col='yellow')
+legend('bottomright', c("Least Square line", "Pop. Regression Line"), 
+       fill=c("green","yellow"), cex = 0.6)
+```
+
+- In the output, the F-statistics and t-statistics of the $\beta$'s are much larger. Multiple R-squared value increases. In the regression plot, the points are much closer to the regression line.
+
+(i) Repeat (a)–(f) after modifying the data generation process in such a way that there is more noise in the data. The model (3.39) should remain the same. You can do this by increasing the variance of the normal distribution used to generate the error term $\epsilon$ in (b). Describe your results.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+x = rnorm(n=100, mean=0, sd=1)
+eps = rnorm(n=100, mean=0, sd=1)
+y = -1 + 0.5*x + eps
+par(mfrow=c(1,2))
+plot(x, y, col=5)
+Fit13i = lm(y~x)
+summary(Fit13i)
+plot(x, y, col = "black")
+abline(Fit13i, col = 'green')
+abline(-1, 0.5, lwd = 3, col='yellow')
+legend('bottomright', c("Least Square line", "Pop. Regression Line"), 
+       fill=c("green","yellow"), cex = 0.6)
+```
+
+- In the output, the F-statistics and t-statistics of the $\beta$'s are much smaller. Multiple R-squared value substantially decreases. In the regression plot, the points are much further away from the regression line.
+
+(j) What are the confidence intervals for $\beta_0$ and $\beta_1$ based on the original data set, the noisier data set, and the less noisy data set? Comment on your results.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+pander(confint(Fit13e)) #original data set
+pander(confint(Fit13h)) #less noisy data set
+pander(confint(Fit13i)) #noisier data set
+```
+
+- As the data has more noise, the confidence interval becomes wider. 
+
+\hfill
+
+14. This problem focuses on the collinearity problem.
+
+
+(a) Perform the following commands in R:
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+set.seed(1)
+x1 = runif(100)
+x2 = 0.5 * x1 + rnorm(100)/10
+y = 2 + 2*x1 + 0.3*x2 + rnorm(100)
+```
+
+The last line corresponds to creating a linear model in which `y` is a function of `x1` and `x2`. Write out the form of the linear model. What are the regression coefficients?
+
+$Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \epsilon$ and $\beta_0 = 2$, $\beta_1 = 2$, $\beta_2 = 0.3$.
+
+(b) What is the correlation between x1 and x2? Create a scatterplot displaying the relationship between the variables.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+cor(x1, x2)
+plot(x1, x2, col = 3)
+```
+
+(c) Using this data, fit a least squares regression to predict y using x1 and x2. Describe the results obtained. What are $\hat \beta_0, \hat \beta_1, \hat \beta_2$? How do these relate to the true $\beta_0, \beta_1, \beta_2$? Can you reject the null hypothesis H0 : $\beta_1 = 0$? How about the null hypothesis H0 : $\beta_2 = 0$
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit14c = lm(y~x1+x2)
+summary(Fit14c)
+```
+
+- $\hat \beta_0 = 2.1305, \hat \beta_1 = 1.4396, \hat \beta_2 = 1.0097$. only $\hat \beta_0$ is close to real $\beta_0$. $\hat \beta_1$ is significant, p < 0.05 and $\hat \beta_2$ is not significant, p > 0.05. We reject the null hypothesis that $\beta_1 = 0$, while we do not have sufficient evidence to reject the hypothesis $\beta_2 = 0$.
+
+(d) Now fit a least squares regression to predict y using only x1. Comment on your results. Can you reject the null hypothesis H0 : $\beta_1 = 0$
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit14d = lm(y~x1)
+summary(Fit14d)
+```
+
+- $\hat \beta_1$ is significant, p < 0.05 and we can reject the null hypothesis that $\beta_1 = 0$. 
+
+(e) Now fit a least squares regression to predict y using only x2. Comment on your results. Can you reject the null hypothesis H0 : $\beta_1 = 0$
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+Fit14e = lm(y~x2)
+summary(Fit14e)
+```
+
+- $\hat \beta_1$ is significant, p < 0.05 and we can reject the null hypothesis that $\beta_1 = 0$. 
+
+(f) Do the results obtained in (c)–(e) contradict each other? Explain your answer.
+
+- No, because x1 and x2 have collinearity, it is hard to tell apart their solitary effect on y when regressing on them together. 
+
+(g) Now suppose we obtain one additional observation, which was unfortunately mismeasured. Re-fit the linear models from (c) to (e) using this new data. What effect does this new observation have on the each of the models? In each model, is this observation an outlier? A high-leverage point? Both? Explain your answers.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+x1 = c(x1, 0.1)
+x2 = c(x2, 0.8)
+y = c(y, 6)
+Fit14gc = lm(y~x1+x2)
+summary(Fit14gc)
+Fit14gd = lm(y~x1)
+summary(Fit14gd)
+Fit14ge = lm(y~x2)
+summary(Fit14ge)
+```
+
+- In model 1, x2 is now statistically significant while x1, which was significant, is not. And when regressing them individually, x1 and x2 are still statistically significant.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+par(mfrow=c(2,2))
+plot(Fit14gc)
+```
+- The data (#101) is a high-leverage point but not an outlier.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+par(mfrow=c(2,2))
+plot(Fit14gd)
+```
+- The data (#101) is a high-leverage point as well as an outlier.
+
+```{r, echo=T,message=FALSE,comment=NA, warning=FALSE}
+par(mfrow=c(2,2))
+plot(Fit14ge)
+```
+- The data (#101) is a high-leverage point but not an outlier.

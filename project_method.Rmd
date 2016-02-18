@@ -1,0 +1,399 @@
+---
+title: "Project Method"
+author: "Dennis Liu"
+geometry: margin=1in
+output:
+  html_document:
+    fig_height: 4
+    fig_width: 8
+  pdf_document:
+    fig_height: 4.3
+    fig_width: 8
+    keep_tex: yes
+setspace: onehalfspacing
+fontsize: 12pt
+---
+
+
+\hfill
+
+\hfill 
+
+The methods I will cover in this chapter are Random Forest, Naive Bayes, Linear SVM, Boosting, K-nearest Neighbor. 
+
+My goal is to compare test accuracy and elapsed time between each of them. 
+
+##### Overall Information
+
+```{r data, echo=T,message=FALSE,comment=NA, warning=FALSE}
+starcraft = read.table(file="starcraft.txt",head=TRUE,sep=",", na.strings = '?')
+star.std = starcraft
+star.std$rank = ifelse(starcraft[,'LeagueIndex'] > 4,  1, 0) # 1 stands for high
+star.std$rank = as.factor(star.std$rank)
+star.std = star.std[,-c(1,2)] #exclude ID and league information
+# apply(starcraft,2,range) #those with small value are scaled
+star.std[,c(5,6,7,8,9,10,14,15,16,17,18)] = 60*88.5 *
+  star.std[,c(5,6,7,8,9,10,14,15,16,17,18)]
+star.std[,c(7,14)] = star.std[,c(7,14)]/60  # UniqueHotkeys and TotalMapExplored
+cat ("there is ", length(which(apply(starcraft,2,is.na)==1)), 
+     " missing value") #no missing value
+# cat ("The features are", colnames(star.std)[-19])
+star.std = na.omit(star.std)
+
+# loading library
+library(randomForest)
+library(class)
+library(ggplot2)
+library(microbenchmark)
+library(adabag)
+library(MASS)
+library("e1071")
+```
+
+##### Features Information
+
+- Age: Age of each player (integer) 
+
+- HoursPerWeek: Reported hours spent playing per week (integer) 
+
+- TotalHours: Reported total hours spent playing (integer) 
+
+- APM: Action per minute (continuous) 
+
+- SelectByHotkeys: Number of unit or building selections made using hotkeys per minutes 
+
+- AssignToHotkeys: Number of units or buildings assigned to hotkeys per minutes 
+
+- UniqueHotkeys: Number of unique hotkeys used per seconds
+
+- MinimapAttacks: Number of attack actions on minimap per minutes 
+
+- MinimapRightClicks: number of right-clicks on minimap per minutes 
+
+- NumberOfPACs: Number of PACs(shift of screen) per minutes
+
+- GapBetweenPACs: Mean duration in milliseconds between PACs (continuous)
+
+- ActionLatency: Mean latency from the onset of a PACs to their first action in milliseconds (continuous) 
+
+- ActionsInPAC: Mean number of actions within each PAC (continuous) 
+
+- TotalMapExplored: The number of 24x24 game coordinate grids viewed by the player per seconds 
+
+- WorkersMade: Number of SCVs, drones, and probes trained per minutes 
+
+- UniqueUnitsMade: Unique unites made per minutes 
+
+- ComplexUnitsMade: Number of ghosts, infestors, and high templars trained per minutes 
+
+- ComplexAbilitiesUsed: Abilities requiring specific targeting instructions used per minutes
+
+* 1 real-time second is equivalent to roughly 88.5 timestamps
+
+\hfill
+
+```{r train/test data, echo=T,message=FALSE,comment=NA,warning=FALSE}
+set.seed(1)
+size = nrow(star.std)
+train = sample(size, size/2)
+data.train = star.std[train,]; data.test = star.std[-train,] 
+```
+
+##### Logistic Regression
+
+```{r logistic, echo=T,message=FALSE,comment=NA,warning=FALSE}
+# library(pander)
+logisticF <- function(){
+set.seed(669)
+logit = glm(rank ~., data = data.train, family = "binomial"(link="logit"))
+prob = predict(logit, newdata = data.test[,-19], type = "response")
+pred = rep(0, length(prob)); pred[prob > 0.5] = 1
+return(pred)}
+
+ptm = proc.time()
+pred = logisticF()
+logisticF; (result = table(data.test$rank, pred))
+error.logit = sum(result[2:3])/sum(result)
+cat("The testing error is ", error.logit) 
+tm.logit = proc.time() - ptm
+
+# The optimal threshold is close to 0.5
+# threshold = seq(from=0,to = 1, by = 0.002)
+# index = 0;
+# error = numeric(length(threshold))
+# for (i in threshold){
+#   pred = rep(0, length(prob)); pred[prob > i] = 1
+#   result = table(data.test$rank, pred)
+#   error[index] = sum(result[2:3])/sum(result)
+#   index = index +1
+# }
+# plot(threshold,error)
+# error[error==0]=NA # the reason I do it is because error is defaulted to be 0
+# threshold[which.min(error)]
+
+```
+
+##### SVM Classification 
+```{r svm, echo=T,message=FALSE,comment=NA,warning=FALSE}
+svmF <- function(){
+set.seed(45)
+# tuning svm to find kernel and cost parameter
+# x = subset(data.train, select=-rank)
+# y = subset(data.train, select= rank)
+# radial kernel to find best parameter cost = 1, gamma = 0.5
+# svm.tune = tune(svm, train.x=x, train.y=y, 
+#               kernel="radial", ranges=list(cost=10^(-1:2), gamma=c(.5,1,2)))
+# print(svm.tune)
+# 
+# linear kernel to find best parameter cost = 10
+# svm.tune = tune(svm, rank ~ ., data = data.train, 
+#                 kernel="linear", ranges=list(cost=10^(-1:2)))
+# print(svm.tune)
+# 
+# polynomial kernel degree 2 to find best parameter cost = 10
+# svm.tune = tune(svm, rank ~ ., data = data.train, 
+#                 kernel="polynomial", degree = 2, ranges=list(cost=10^(-1:2)))
+# print(svm.tune)
+
+# svm.radial = svm(rank ~ ., data = data.train, 
+#           kernel = "radial",cost = 1, gamma = 0.5)
+# pred = rep(0, nrow(data.test)); pred = predict(svm.radial, newdata = data.test)
+# (result = table(data.test$rank, pred))
+# error = sum(result[2:3])/sum(result)
+# cat("The svm (radial) testing error is ", error) 
+
+svm.ln = svm(rank ~ ., data = data.train, 
+          kernel = "linear", cost = 10)
+pred = rep(0, nrow(data.test))
+pred = predict(svm.ln, newdata = data.test)
+return (pred)}
+
+ptm = proc.time()
+pred = svmF(); (result = table(data.test$rank, pred))
+error.svm = sum(result[2:3])/sum(result)
+cat("The svm (linear) testing error is ", error.svm) 
+tm.svm = proc.time() - ptm
+
+# svm.poly = svm(rank ~ ., data = data.train,  
+#                kernel = "polynomial", degree = 2, cost = 10)
+# pred = rep(0, nrow(data.test)); pred = predict(svm.poly, data = data.test)
+# (result = table(data.test$rank, pred))
+# error = sum(result[2:3])/sum(result)
+# cat("The svm (poly) testing error is ", error) 
+
+```
+
+\hfill
+
+##### Classification Tree
+
+```{r classification tree, echo=T,message=FALSE,comment=NA,warning=FALSE}
+# library(tree)
+# class.tree = tree(rank ~ ., data = data.train)
+# pred = rep(0, nrow(data.test))
+# pred = predict(class.tree, data = data.test,type = "class")
+# (result = table(data.test$rank, pred))
+# error = sum(result[2:3])/sum(result)
+# cat("The tree classification testing error is ", error) 
+# # tree prune 
+# cv.tree = cv.tree(class.tree, FUN = prune.misclass)
+# plot(cv.tree$size, cv.tree$dev, type = "b",xlab = "Tree size", 
+#      ylab = "Deviance")
+```
+
+```{r random forest, echo=T,message=FALSE,comment=NA,warning=FALSE}
+
+randomF <- function(){
+set.seed(21)
+randomF = randomForest(x = data.train[,-19], y = data.train[,19], 
+                       xtest = data.test[,-19], ytest = data.test[,19], 
+                       mtry = ncol(data.train[,-19])/2, ntree = 500)
+return (randomF)}
+
+ptm = proc.time()
+pred = randomF(); (result = pred$confusion) 
+# this is OOB estimates of error rate
+error.randomF = sum(result[2:3])/sum(result[1:4])
+cat("The tree classification testing error is ", error.randomF) 
+tm.randomF = proc.time() - ptm
+
+
+```
+
+```{r bagging, echo=T,message=FALSE,comment=NA,warning=FALSE}
+
+baggingF <- function(){
+set.seed(12)
+bagging = randomForest(rank ~ ., data = data.train, 
+                       mtry = ncol(data.train[,-19]), ntree = 500)
+return (bagging)}
+
+ptm = proc.time()
+pred = baggingF(); (result = pred$confusion) 
+# this is OOB estimates of error rate
+error.bagging = sum(result[2:3])/sum(result[1:4])
+cat("The bagging algorithm testing error is ", error.bagging) 
+tm.bagging = proc.time() - ptm
+
+
+```
+
+```{r boosting, echo=T,message=FALSE,comment=NA,warning=FALSE}
+
+boostingF <- function(){
+set.seed(53)
+# tuning process to choose the best shrinking lambda = 
+boost = boosting(rank ~ ., data = data.train, mfinal = 10)
+pred = rep(0, nrow(data.test)); pred = predict(boost, newdata = data.test)
+return (pred)}
+
+ptm = proc.time()
+pred = boostingF(); (result = table(data.test$rank, pred$class))
+error.boosting = sum(result[2:3])/sum(result)
+cat("The boosting (10 iteration) testing error is ", error.boosting)
+tm.boosting = proc.time() - ptm
+
+
+# this takes sooo long and no big differences as we increases no. of tree
+# mse = rep(0, 40)
+# for (i in c(1:40)){
+#   boost = boosting(rank ~ ., data = data.train, mfinal = i)
+#   pred = rep(0, nrow(data.test)); pred = predict(boost, newdata = data.test)
+#   result = table(data.test$rank, pred$class)
+#   error[i] = sum(result[2:3])/sum(result)
+# }
+# plot(i, error[i], type = "b",xlab = "number of tree", ylab = "Test MSE", col =4) # it turns out to be 12, but really small improvement
+
+```
+
+```{r naive bayes, echo=T,message=FALSE,comment=NA,warning=FALSE}
+naiveF <- function(){
+set.seed(5)
+naiveB = naiveBayes(rank ~ ., data = data.train)
+pred = rep(0, nrow(data.test))
+pred = predict(naiveB, newdata = data.test)
+return (pred)}
+
+ptm = proc.time()
+pred = naiveF(); (result = table(data.test$rank, pred))
+error.naive = sum(result[2:3])/sum(result)
+cat("The Naive Bayes testing error is ", error.naive) 
+tm.naive = proc.time() - ptm
+
+
+```
+
+
+```{r k nearest neighbor, echo=T,message=FALSE,comment=NA,warning=FALSE}
+
+knnF <- function(){
+set.seed(1)
+train.X = as.matrix(data.train[,-19])
+test.X = as.matrix(data.test[,-19])
+train.Y = data.train[,19]
+pred = knn(train.X,test.X,train.Y ,k=40)
+return (pred)}
+
+ptm = proc.time()
+pred = knnF(); (result = table(data.test$rank, pred))
+error.knn = sum(result[2:3])/sum(result)
+cat("The KNN (k=40) testing error is ", error.knn) 
+tm.knn = proc.time() - ptm
+
+
+# this is to find the best K = 40
+# N = 200 # number of iterations
+# mse = rep(0, N)
+# for (i in c(1:N)){
+# pred = knn(train.X,test.X,train.Y ,k=i)
+# result = table(data.test$rank, pred)
+# mse[i] = sum(result[2:3])/sum(result)
+# }
+# plot(x=i, y=mse[i], type = "l",xlab = "k =", ylab = "Test MSE") 
+# it turns out to be 40, no big differences throughout possibilities
+
+```
+
+```{r LDA, echo=T,message=FALSE,comment=NA,warning=FALSE}
+ 
+ldaF <- function(){
+set.seed(6)
+lda = lda(rank ~.,data= data.train)
+pred = predict(lda, newdata=data.test[,-19])
+return (pred)}
+
+ptm = proc.time()
+pred = ldaF(); (result = table(data.test$rank, pred$class))
+error.lda = sum(result[2:3])/sum(result)
+cat("The LDA testing error is ", error.lda)
+tm.lda = proc.time() - ptm
+
+
+```
+
+```{r QDA, echo=T,message=FALSE,comment=NA,warning=FALSE}
+
+qdaF <- function(){
+set.seed(12)
+qda = qda(rank ~.,data= data.train)
+pred = predict(qda, newdata=data.test[,-19])
+return (pred)}
+
+ptm = proc.time()
+pred = qdaF(); (result = table(data.test$rank, pred$class))
+error.qda = sum(result[2:3])/sum(result)
+cat("The LDA testing error is ", error.qda)
+tm.qda = proc.time() - ptm
+
+
+```
+
+
+
+```{r benchmark, echo=T,message = F,comment=NA,warning=F}
+tm = microbenchmark(logisticF(),
+                    svmF(),
+                    randomF(),
+                    baggingF(),
+                    boostingF(),
+                    naiveF(),
+                    knnF(),
+                    ldaF(),
+                    qdaF(), times = 1L)
+autoplot(tm)+ scale_y_continuous(breaks = c(100, 500, 1000, 2000, 3000, 4000)) + ylab("time, milliseconds")
+```
+
+```{r compare model, echo=T,message = F,comment=NA,warning=F}
+functions = c('logistic', 'svm', 'randomforest', 'bagging',
+              'boosting','naive', 'knn', 'lda', 'qda')
+time = round(c(tm.logit[3],tm.svm[3], tm.randomF[3],tm.bagging[3],
+         tm.boosting[3],tm.naive[3],tm.knn[3],tm.lda[3],tm.qda[3]),3)
+accuracy = round(c(1-error.logit, 1-error.svm, 1-error.randomF, 
+                   1-error.bagging, 1- error.boosting, 1-error.naive,
+                   1-error.knn, 1-error.lda, 1-error.qda),3)
+
+model_compare = data.frame(Model = functions, Elapse = time)
+print(time)
+ggplot(aes(x=Model, y=Elapse), data=model_compare) +
+    geom_bar(stat='identity', fill = 'green') +
+    ggtitle('Comparative Elapse of Models') +
+    xlab('Models') +
+    ylab('Overall Elapse of Time')
+
+model_compare = data.frame(Model = functions, Accuracy = accuracy)
+ggplot(aes(x=Model, y=Accuracy), data=model_compare) +
+    geom_bar(stat='identity', fill = 'blue') +
+    ggtitle('Comparative Accuracy of Models') +
+    xlab('Models') +
+    ylab('Overall Accuracy')
+
+```
+
+##### Question
+1. runtime test, should I include tuning algorithm?
+2. accuracy and speed comparison, what will be my x-axis
+3. classification tree (tree function) won't consider all features
+4. probably don't have time to write out all functions
+5. should I include set.seed() in the function and all functions
+
+
